@@ -1,0 +1,78 @@
+{
+  "content_sha256": "20e4e3b0c415db2c7fd4d364dbcd8dbf1871a8a38f0c9602c5638405d8a665ef",
+  "engine_version": "0.2.0",
+  "generated_at_utc": "2026-10-14T17:03:30.348357Z",
+  "international": {
+    "gold_reference_inr_per_gram": {
+      "calculation": "XAU/USD per troy ounce \u00d7 USD/INR \u00f7 31.1034768",
+      "classification": "contextual reference; not an MCX settlement or executable price",
+      "fx_effective_date": "2026-10-14",
+      "gold_timestamp_utc": "2026-10-14T16:48:01.789970+00:00",
+      "value": "12495.15243582029389074600175"
+    },
+    "gold_spot": {
+      "computed_at_utc": "2026-10-14T16:48:01.789970+00:00",
+      "is_stale": false,
+      "price_usd_per_gram": "131.2653895978600051554365138",
+      "price_usd_per_troy_ounce": "4082.81",
+      "source_url": "https://api.goldprice.dev/v1/prices?symbol=XAU-USD-SPOT&include=sources",
+      "sources": [
+        {
+          "display_name": "Live spot",
+          "fetched_at": "2026-10-14T16:47:02.081965+00:00",
+          "is_stale": false,
+          "price": "4082.81",
+          "source": "oracle.xau_usd",
+          "source_timestamp": "2026-10-14T16:47:00+00:00",
+          "unit": "troy_ounce"
+        }
+      ]
+    },
+    "usd_inr": {
+      "effective_date": "2026-10-14",
+      "rate": "95.19",
+      "requested_date": "2026-10-14",
+      "source_url": "https://api.frankfurter.dev/v2/rate/USD/INR?date=2026-10-14"
+    }
+  },
+  "mode": "SUPPLEMENTARY_REFERENCE",
+  "providers": [
+    {
+      "authentication": "optional API key; keyless is 15-minute delayed",
+      "coverage": "Free: latest spot and 30 days of daily XAU/USD bars",
+      "id": "goldprice.dev",
+      "last_successful_update": "2026-10-14T17:03:30.348460Z",
+      "latest_observation": "2026-10-14T16:48:01.789970+00:00",
+      "limitations": "International reference spot, not MCX futures; free commercial use requires visible attribution",
+      "status": "available"
+    },
+    {
+      "authentication": "none",
+      "coverage": "Daily reference rates; historical coverage varies by contributing official source",
+      "id": "frankfurter",
+      "last_successful_update": "2026-10-14T17:03:31.393408Z",
+      "latest_observation": "2026-10-14",
+      "limitations": "Reference mid-market/blended rate, not an executable FX quote",
+      "status": "available"
+    },
+    {
+      "authentication": "FRED_API_KEY required server-side",
+      "coverage": "Optional point-in-time macroeconomic observations",
+      "id": "fred",
+      "last_successful_update": null,
+      "latest_observation": null,
+      "limitations": "Not used in signals; revision/vintage handling required",
+      "status": "not_configured"
+    },
+    {
+      "authentication": "GNEWS_API_KEY required server-side",
+      "coverage": "Free: 100 requests/day, 10 articles/request, last 30 days, 12-hour delay",
+      "id": "gnews",
+      "last_successful_update": null,
+      "latest_observation": null,
+      "limitations": "Context only; never enters quantitative signal formation",
+      "status": "not_configured"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

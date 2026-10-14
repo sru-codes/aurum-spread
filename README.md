@@ -55,7 +55,10 @@ src/                    React product prototype
   lib/analytics.ts       browser-side normalization helpers
 analytics/              auditable Python research core, importer, and tests
 data/                    lineage manifests, validation reports, and cleaned outputs
+public/data/             browser-safe, dated analytical/context snapshots
 docs/RESEARCH.md         data, methodology, risks, and build plan
+docs/ARCHITECTURE.md     data paths, trust boundaries, and storage decisions
+docs/DATA_PROVIDERS.md   provider setup, verified limits, and credentials
 docs/PITCH_DECK.md       content mapped to the supplied 8-slide template
 docs/DEPLOYMENT.md       Railway deployment and verification
 docs/VERSIONING.md       Semantic Versioning and release procedure
@@ -83,6 +86,10 @@ GOLDM is quoted per 10g at 995 purity. GOLDTEN is quoted per 10g at 999 purity; 
 - A finding that no persistent edge survives costs is a valid result.
 
 See [docs/RESEARCH.md](docs/RESEARCH.md) for the full methodology and official sources.
+
+## Supplementary context providers
+
+International spot and FX context are deliberately separate from MCX contract analytics. The Python adapters support goldprice.dev and Frankfurter with schema validation, caching, bounded retry, and explicit timestamps/units. FRED and GNews adapters are optional and require server-side credentials. See [the provider guide](docs/DATA_PROVIDERS.md) and [.env.example](.env.example).
 
 ## Project status
 
