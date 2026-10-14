@@ -195,7 +195,7 @@ function App() {
     <main><section className="hero-copy"><div><span className="eyebrow"><Sparkles size={13} /> Commodity derivatives intelligence</span><h1>Find the spread.<br /><em>Prove the edge.</em></h1></div><p>A defensible monitor for price dislocations across MCX gold contract sizes—normalized for purity, filtered for liquidity, and tested without hindsight.</p></section>
       <Tabs defaultValue="monitor"><div className="nav-row"><TabsList variant="line" aria-label="Product sections"><TabsTrigger value="monitor">Monitor</TabsTrigger><TabsTrigger value="method">Methodology</TabsTrigger><TabsTrigger value="data">Data notes</TabsTrigger></TabsList><a className="repo-link" href="https://github.com" target="_blank" rel="noreferrer"><Code2 size={15} /> Repository</a></div><TabsContent value="monitor"><Dashboard /></TabsContent><TabsContent value="method"><Methodology /></TabsContent><TabsContent value="data"><DataNotes /></TabsContent></Tabs>
     </main>
-    <footer><span>Aurum Spread · Hack in Hills ’26</span><span>Research prototype · Not investment advice</span></footer>
+    <footer><span>Aurum Spread v0.1.0 · Hack in Hills ’26</span><span>Research prototype · Not investment advice</span></footer>
   </div></TooltipProvider>
 }
 

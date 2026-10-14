@@ -1,0 +1,11 @@
+.git
+.git-credentials
+.github
+.21st
+node_modules
+dist
+__pycache__
+*.pyc
+data/raw
+*.log
+.env*

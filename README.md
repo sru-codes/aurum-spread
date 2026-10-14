@@ -1,6 +1,10 @@
 # Aurum Spread
 
-A research-grade relative-value monitor for MCX gold futures. It compares GOLDM, GOLDTEN, GOLDGUINEA, and GOLDPETAL after correcting for quotation base and purity, then decides whether a statistical dislocation survives liquidity and transaction-cost constraints.
+[![Release](https://img.shields.io/github/v/release/sru-codes/aurum-spread?display_name=tag)](https://github.com/sru-codes/aurum-spread/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-9b7017.svg)](LICENSE.md)
+[![Hackathon](https://img.shields.io/badge/Hack%20in%20Hills-'26-20211f.svg)](docs/RESEARCH.md)
+
+A research-grade relative-value monitor for MCX gold futures, built for the **Commodity Derivatives Intelligence** track at **Hack in Hills ’26**. It compares GOLDM, GOLDTEN, GOLDGUINEA, and GOLDPETAL after correcting for quotation base and purity, then decides whether a statistical dislocation survives liquidity and transaction-cost constraints.
 
 The central product decision is deliberate: **a large spread is not automatically a trade**. Aurum Spread can surface an anomaly while withholding an alert when estimated execution costs consume the expected convergence.
 
@@ -32,8 +36,15 @@ Production checks:
 npm run build
 npm run lint
 cd analytics
-python3 -m unittest -v
+python3 -m unittest discover -s analytics -v
+npm audit --audit-level=high
 ```
+
+## Deploy on Railway
+
+The repository includes a production multi-stage Docker build. Node compiles the Vite application and Caddy serves the static output using Railway's injected `PORT`, SPA fallback, compression, security headers, and `/health` endpoint.
+
+Connect `sru-codes/aurum-spread` from Railway's **Deploy from GitHub repo** flow, then generate a public domain. No application secrets are required for the synthetic MVP. See [the deployment guide](docs/DEPLOYMENT.md).
 
 ## Repository map
 
@@ -46,7 +57,11 @@ src/                    React product prototype
 analytics/              auditable Python research core and tests
 docs/RESEARCH.md         data, methodology, risks, and build plan
 docs/PITCH_DECK.md       content mapped to the supplied 8-slide template
+docs/DEPLOYMENT.md       Railway deployment and verification
+docs/VERSIONING.md       Semantic Versioning and release procedure
 components.json          shadcn + React Bits registry configuration
+SECURITY.md              private reporting and project security scope
+CHANGELOG.md             released and planned capabilities
 ```
 
 ## Core formula
@@ -68,6 +83,12 @@ GOLDM is quoted per 10g at 995 purity. GOLDTEN is quoted per 10g at 999 purity; 
 - A finding that no persistent edge survives costs is a valid result.
 
 See [docs/RESEARCH.md](docs/RESEARCH.md) for the full methodology and official sources.
+
+## Project status
+
+Current release: **v0.1.0 — Research Prototype**.
+
+The dashboard and analytical mechanics are functional, but the displayed observations remain synthetic until the official MCX import and frozen historical holdout are completed. See the [changelog](CHANGELOG.md), [versioning policy](docs/VERSIONING.md), [security policy](SECURITY.md), and [contribution guide](CONTRIBUTING.md).
 
 ## Name
 

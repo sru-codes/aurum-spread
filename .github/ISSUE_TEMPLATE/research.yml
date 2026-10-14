@@ -1,0 +1,26 @@
+name: Research or feature proposal
+description: Propose an analytical improvement, data source, or product capability.
+title: "research: "
+labels: ["enhancement", "research"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or hypothesis
+      description: State the decision this would improve or the hypothesis it would test.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and data source
+      description: Link primary sources and note coverage, licensing, and known limitations.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Explain chronology, holdout, costs, liquidity, lifecycle controls, and success criteria.
+    validations:
+      required: true
