@@ -4,13 +4,22 @@ All notable changes to Aurum Spread are documented here. The project follows [Se
 
 ## [Unreleased]
 
-### Planned
+### Added
 
-- Official MCX Bhavcopy import workflow and immutable raw-file checksums
-- Historical contract-specification versioning
-- Generated dashboard data from the Python research pipeline
-- Frozen chronological holdout and cost-sensitivity report
-- Research snapshot export
+- Expiry-safe contract keys and explicit multi-expiry pairing
+- Strict MCX CSV validation with immutable raw archives, SHA-256 lineage, manifests, and rejected-row reports
+- Effective-expiry contract specification registry for all four target gold futures
+- Hash-verified daily-dataset merge and deterministic research snapshot generation
+- Trailing-only spread, liquidity, market-state, eligibility, carry, and lifecycle analysis
+- Chronological train/validation/test labels and next-session research simulation
+- Integer-lot contract P&L with convergence, gold exposure, unexplained residual, and itemized cost attribution
+- Slippage sensitivity scenarios and expanded regression coverage
+
+### Remaining
+
+- Import and freeze an official MCX historical sample (automated access is blocked in the current environment)
+- Connect generated research snapshots to every dashboard control and chart
+- Add a verified historical exchange-session calendar for exact tender-period gating
 
 ## [0.1.0] — 2026-10-14
 

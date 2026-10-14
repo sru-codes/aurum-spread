@@ -28,12 +28,14 @@ Always retain the exact specification PDF or circular effective for the historic
 
 ## Contract normalization
 
-| Symbol | Trading unit | Price quoted per | Purity | Typical expiry window |
+| Symbol | Trading unit | Price quoted per | Purity | Current last-trading-day rule |
 |---|---:|---:|---:|---|
-| GOLDM | 100g | 10g | 995 | 3rd–5th |
-| GOLDTEN | 10g | 10g | 999 | 27th–31st |
-| GOLDGUINEA | 8g | 8g | 999 | 27th–31st |
-| GOLDPETAL | 1g | 1g | 999 | 27th–31st |
+| GOLDM | 100g | 10g | 995 | 5th calendar day, or preceding working day |
+| GOLDTEN | 10g | 10g | 999 | Last calendar day, or preceding working day |
+| GOLDGUINEA | 8g | 8g | 999 | Last calendar day, or preceding working day |
+| GOLDPETAL | 1g | 1g | 999 | Last calendar day, or preceding working day |
+
+All four current specifications use compulsory delivery and a staggered tender period covering the last three trading days, including expiry. The research gate uses a configurable conservative calendar-day buffer because a verified historical exchange-session calendar has not yet been imported. It must not claim exact tender-session eligibility until that calendar is present.
 
 For each close:
 
@@ -51,12 +53,14 @@ Do not divide GOLDM's price by its 100g trading unit. Its displayed price is quo
 2. Validate that the returned `Date` equals the requested date. Requests use `DD/MM/YYYY`; responses can use `MM/DD/YYYY`.
 3. Trim padded symbols and parse compact expiry values such as `04SEP2026`.
 4. Filter futures observations for the four target symbols.
-5. Join by trading date while preserving each leg's actual expiry date.
+5. Identify every record by `(trading_date, symbol, expiry_date)`. A symbol-only join fails closed when multiple expiries exist.
 6. Compute days to expiry and reject entries that cannot exit before tender/expiry restrictions.
 7. Normalize close prices and compute pair spreads.
 8. Record data-quality flags instead of silently imputing suspicious observations.
 
-The first production connector should ingest an official downloaded CSV/XLS export. Avoid coupling the project to an undocumented website endpoint during judging.
+The importer consumes an official downloaded CSV and never falls back to a third-party data source. It archives the raw bytes first, verifies SHA-256, and emits an accepted/rejected validation report. Clean daily outputs can be merged only after their content hashes and specification hashes pass verification; duplicate contract keys abort the merge. Legacy binary `.xls` files currently require a lossless CSV export, while the original file is retained with the research run.
+
+Automated MCX access was blocked by the exchange edge service from the build environment on 14 October 2026. Therefore this repository currently contains no verified historical observations, and no synthetic record is labeled empirical.
 
 ## Signal design
 
@@ -74,18 +78,35 @@ Candidate rule set:
 - No entry inside the contract-specific expiry buffer
 - No alert unless expected convergence exceeds fees, taxes, slippage, and a safety buffer
 - Apply a signal no earlier than the next session in the backtest
+- Treat a zero-variance training window as statistically undefined, not as a forced signal
 
 Thresholds must be chosen on training data and frozen before the holdout period.
 
 ## Walk-forward validation
 
 - Split chronologically; never shuffle time-series rows.
-- Reserve the final 30% as an unseen holdout for the demo.
+- Partition chronologically into 60% training, 20% validation, and a final untouched 20% test set.
 - Refit rolling statistics only from past observations.
 - Price P&L using the actual contracts held, not a gold index.
-- Charge each leg independently on entry, exit, and roll.
-- Stress costs at 1×, 1.5×, and 2× the base assumption.
+- Use integer futures lots. The implemented hedge chooses one lot of the larger contract and the nearest whole number of smaller-contract lots, then reports remaining fine-gold exposure.
+- Charge brokerage, exchange/regulatory fees, slippage, and funding separately on the two-leg notional.
+- Stress slippage at explicit 1, 2, 5, and 10 basis-point scenarios by default.
 - Report performance by pair and liquidity regime to expose concentration.
+
+The P&L identity is checked daily:
+
+```text
+gross contract P&L
+  = relative convergence P&L
+  + residual fine-gold exposure P&L
+  + unexplained numerical/model residual
+
+net P&L
+  = gross contract P&L
+  − brokerage − fees − slippage − funding
+```
+
+The unexplained component is retained even when it is near zero; the system does not silently force the attribution to balance.
 
 Required output metrics: eligible days and trades; gross convergence; explicit costs and net return; maximum drawdown; hit rate; holding period; turnover; residual gold beta; and sensitivity excluding the thinnest observations.
 
@@ -98,6 +119,8 @@ Required output metrics: eligible days and trades; gross convergence; explicit c
 - Taxes, brokerage, exchange fees, impact, margin funding, and delivery/tender constraints can erase a paper edge.
 - Historical contract specifications must be versioned; using today's rules for old contracts can introduce errors.
 - The current dashboard values are synthetic fixtures and prove interaction and methodology only.
+- The carry adjustment is a declared annualized configuration input, not an estimated fact. A zero setting means “no carry estimate supplied,” not “carry does not exist.”
+- The close-plus-slippage model is hypothetical. Bhavcopy volume is an activity measure, not proof that the modeled integer-lot spread could be filled.
 
 ## MVP acceptance criteria
 

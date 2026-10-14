@@ -37,3 +37,17 @@ The importer copies the original bytes into `data/raw/<dataset-id>/` before pars
 `data/raw/` is ignored by Git to avoid redistributing exchange data; it must be retained with the research run. Manifests and validation reports are designed to be committed. A rejected import never produces a clean dataset.
 
 The site blocks automated retrieval in some environments, including the current build environment. The pipeline therefore consumes a user-downloaded official export instead of hiding a third-party fallback. Legacy binary `.xls` files must be exported to CSV without altering rows; the original `.xls` should still be retained alongside the run by the researcher.
+
+## Build a historical research snapshot
+
+Merge validated daily outputs with `pipeline.merge_clean_datasets`, then run an explicit contract pair:
+
+```bash
+python3 analytics/run_research.py data/clean/mcx-history-….json \
+  --candidate GOLDTEN --candidate-expiry 2026-10-30 \
+  --reference GOLDM --reference-expiry 2026-11-05 \
+  --lookback 40 --annual-carry-bps 0 \
+  --output public/data/research/goldten-goldm.v1.json
+```
+
+The output is deterministic and self-hashed. It contains raw spread, declared carry adjustment, residual spread, trailing-only statistics, every eligibility gate, chronological partition labels, integer hedge sizes, actual-contract P&L, itemized costs, gold exposure, unexplained residual, drawdown, and cost sensitivity.

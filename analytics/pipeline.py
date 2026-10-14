@@ -169,6 +169,56 @@ def ingest_official_export(
     }
 
 
+def merge_clean_datasets(paths: Sequence[str | Path], output_path: str | Path) -> dict[str, Any]:
+    """Merge validated daily outputs without overwriting a contract key."""
+    if not paths:
+        raise ValueError("at least one cleaned dataset is required")
+    sources: list[dict[str, Any]] = []
+    observations: dict[tuple[str, str, str], dict[str, Any]] = {}
+    specification_hashes: set[str] = set()
+    for path_value in paths:
+        path = Path(path_value)
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("mode") != "VERIFIED_HISTORICAL":
+            raise ValueError(f"{path} is not a VERIFIED_HISTORICAL clean dataset")
+        claimed_hash = payload.get("content_sha256")
+        hash_input = {key: value for key, value in payload.items() if key != "content_sha256"}
+        actual_hash = sha256_bytes(canonical_json(hash_input).encode("utf-8"))
+        if claimed_hash != actual_hash:
+            raise ValueError(f"{path} failed content hash verification")
+        lineage = payload["lineage"]
+        specification_hashes.add(lineage["contract_specifications_sha256"])
+        sources.append({
+            "dataset_id": payload["dataset_id"],
+            "content_sha256": claimed_hash,
+            "raw_sha256": lineage["raw_sha256"],
+        })
+        for item in payload.get("observations", []):
+            key = (item["trading_date"], item["symbol"], item["expiry_date"])
+            if key in observations:
+                raise ValueError(f"Duplicate observation across inputs: {key}")
+            observations[key] = item
+    if len(specification_hashes) != 1:
+        raise ValueError("Inputs were produced with different contract specification configurations")
+    ordered = [observations[key] for key in sorted(observations)]
+    source_digest = sha256_bytes(canonical_json(sources).encode("utf-8"))
+    merged: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "engine_version": ENGINE_VERSION,
+        "dataset_id": f"mcx-history-{source_digest[:12]}",
+        "mode": "VERIFIED_HISTORICAL",
+        "lineage": {
+            "kind": "merged_daily_exports",
+            "sources": sources,
+            "contract_specifications_sha256": next(iter(specification_hashes)),
+        },
+        "observations": ordered,
+    }
+    merged["content_sha256"] = sha256_bytes(canonical_json(merged).encode("utf-8"))
+    _write_json(Path(output_path), merged)
+    return merged
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Archive and validate an official MCX Bhavcopy CSV export")
     parser.add_argument("source", type=Path, help="Downloaded MCX CSV export")

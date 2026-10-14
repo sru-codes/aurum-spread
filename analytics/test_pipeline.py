@@ -6,7 +6,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from pipeline import ingest_official_export
+from pipeline import ingest_official_export, merge_clean_datasets
 
 
 class PipelineTests(unittest.TestCase):
@@ -73,6 +73,18 @@ class PipelineTests(unittest.TestCase):
             source.write_bytes(b"not a csv")
             with self.assertRaises(ValueError):
                 ingest_official_export(source, "14/10/2026", Path(directory) / "workspace")
+
+    def test_merge_refuses_duplicate_contract_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "official.csv"
+            self.write_export(source)
+            first = ingest_official_export(source, "14/10/2026", root / "one")
+            second = ingest_official_export(source, "14/10/2026", root / "two")
+            with self.assertRaisesRegex(ValueError, "Duplicate observation"):
+                merge_clean_datasets(
+                    [first["cleaned_path"], second["cleaned_path"]], root / "merged.json"
+                )
 
 
 if __name__ == "__main__":
