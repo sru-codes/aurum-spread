@@ -35,7 +35,6 @@ Production checks:
 ```bash
 npm run build
 npm run lint
-cd analytics
 python3 -m unittest discover -s analytics -v
 npm audit --audit-level=high
 ```
@@ -54,7 +53,8 @@ src/                    React product prototype
   components/           React Bits component
   data/demo.ts           explicitly synthetic UI fixture
   lib/analytics.ts       browser-side normalization helpers
-analytics/              auditable Python research core and tests
+analytics/              auditable Python research core, importer, and tests
+data/                    lineage manifests, validation reports, and cleaned outputs
 docs/RESEARCH.md         data, methodology, risks, and build plan
 docs/PITCH_DECK.md       content mapped to the supplied 8-slide template
 docs/DEPLOYMENT.md       Railway deployment and verification
@@ -88,7 +88,7 @@ See [docs/RESEARCH.md](docs/RESEARCH.md) for the full methodology and official s
 
 Current release: **v0.1.0 — Research Prototype**.
 
-The dashboard and analytical mechanics are functional, but the displayed observations remain synthetic until the official MCX import and frozen historical holdout are completed. See the [changelog](CHANGELOG.md), [versioning policy](docs/VERSIONING.md), [security policy](SECURITY.md), and [contribution guide](CONTRIBUTING.md).
+The dashboard and analytical mechanics are functional, but the displayed observations remain synthetic until a user-supplied official MCX export passes the importer and a frozen historical holdout is completed. Automated access to MCX was blocked from the current build environment, and no substitute source has been presented as verified data. See the [analytics guide](analytics/README.md), [changelog](CHANGELOG.md), [versioning policy](docs/VERSIONING.md), [security policy](SECURITY.md), and [contribution guide](CONTRIBUTING.md).
 
 ## Name
 

@@ -5,14 +5,35 @@ This dependency-free Python module covers the parts of the prototype where silen
 - MCX response-date validation (`DD/MM/YYYY` request versus `MM/DD/YYYY` response)
 - padded-symbol and compact-expiry parsing
 - contract-specific quotation-base and purity normalization
-- expiry-preserving observations
+- contract identity keyed by trading date, symbol, and expiry date
+- specification versions selected by effective contract-expiry date
 - lagged walk-forward z-scores
 - one-session-delayed, transaction-cost-aware spread backtests
+- byte-preserving raw archives, SHA-256 lineage, validation reports, and versioned cleaned JSON
 
 Run the tests from this directory:
 
 ```bash
-python3 -m unittest -v
+cd analytics
+python3 -m unittest discover -v
 ```
 
-The module intentionally accepts downloaded CSV input instead of depending on an undocumented website endpoint. Raw files should be stored outside version control and checksummed before processing.
+## Import an official MCX export
+
+Download a date-wise CSV from the [official MCX Bhavcopy page](https://www.mcxindia.com/market-data/bhavcopy), then run:
+
+```bash
+python3 analytics/pipeline.py ~/Downloads/BhavCopy.csv \
+  --requested-date 14/10/2026 \
+  --workspace .
+```
+
+The importer copies the original bytes into `data/raw/<dataset-id>/` before parsing, verifies the archive hash, and writes:
+
+- `data/manifests/*.manifest.json` — source URL, UTC retrieval time, filename, byte size, raw SHA-256, specification hash, and validation-report link
+- `data/reports/*.validation.json` — accepted, ignored, and rejected row counts with row-level reasons
+- `data/clean/*.observations.v1.json` — only when every targeted row passes validation
+
+`data/raw/` is ignored by Git to avoid redistributing exchange data; it must be retained with the research run. Manifests and validation reports are designed to be committed. A rejected import never produces a clean dataset.
+
+The site blocks automated retrieval in some environments, including the current build environment. The pipeline therefore consumes a user-downloaded official export instead of hiding a third-party fallback. Legacy binary `.xls` files must be exported to CSV without altering rows; the original `.xls` should still be retained alongside the run by the researcher.

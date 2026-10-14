@@ -1,0 +1,79 @@
+import csv
+import hashlib
+import json
+import tempfile
+import unittest
+from datetime import datetime, timezone
+from pathlib import Path
+
+from pipeline import ingest_official_export
+
+
+class PipelineTests(unittest.TestCase):
+    def write_export(self, path: Path, *, duplicate: bool = False) -> bytes:
+        row = {
+            "Date": "10/14/2026",
+            "Instrument Name": "FUTCOM",
+            "Symbol": " GOLDTEN ",
+            "Expiry Date": "29OCT2026",
+            "Open": "125400",
+            "High": "125600",
+            "Low": "125300",
+            "Close": "125506",
+            "Previous Close": "125390",
+            "Vol (Lots)": "1200",
+            "OI (Lots)": "4500",
+        }
+        with path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(row))
+            writer.writeheader()
+            writer.writerow(row)
+            if duplicate:
+                writer.writerow(row)
+        return path.read_bytes()
+
+    def test_preserves_raw_hash_and_publishes_versioned_clean_data(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "official.csv"
+            raw = self.write_export(source)
+            workspace = root / "workspace"
+            result = ingest_official_export(
+                source,
+                "14/10/2026",
+                workspace,
+                retrieved_at=datetime(2026, 10, 14, 18, 30, tzinfo=timezone.utc),
+            )
+            manifest = json.loads(result["manifest_path"].read_text())
+            cleaned = json.loads(result["cleaned_path"].read_text())
+            archived = result["raw_path"].read_bytes()
+        expected_hash = hashlib.sha256(raw).hexdigest()
+        self.assertEqual(result["status"], "accepted")
+        self.assertEqual(archived, raw)
+        self.assertEqual(manifest["source"]["sha256"], expected_hash)
+        self.assertEqual(manifest["source"]["retrieved_at_utc"], "2026-10-14T18:30:00Z")
+        self.assertEqual(cleaned["mode"], "VERIFIED_HISTORICAL")
+        self.assertEqual(cleaned["observations"][0]["expiry_date"], "2026-10-29")
+
+    def test_rejected_import_gets_report_but_no_clean_dataset(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "duplicate.csv"
+            self.write_export(source, duplicate=True)
+            result = ingest_official_export(source, "14/10/2026", root / "workspace")
+            report = json.loads(result["report_path"].read_text())
+        self.assertEqual(result["status"], "rejected")
+        self.assertIsNone(result["cleaned_path"])
+        self.assertEqual(report["rows_accepted"], 1)
+        self.assertEqual(len(report["issues"]), 1)
+
+    def test_refuses_non_csv_without_archiving_or_conversion(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "official.xls"
+            source.write_bytes(b"not a csv")
+            with self.assertRaises(ValueError):
+                ingest_official_export(source, "14/10/2026", Path(directory) / "workspace")
+
+
+if __name__ == "__main__":
+    unittest.main()
