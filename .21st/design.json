@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "project": {
+    "name": "aurum-spread",
+    "productType": "commodity research dashboard",
+    "stack": [
+      "react",
+      "vite",
+      "typescript",
+      "shadcn",
+      "react-bits"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "src/index.css"
+    ],
+    "components": [],
+    "assets": [
+      "src/assets"
+    ],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "--paper": {
+        "value": "#faf8f2",
+        "source": "src/index.css"
+      },
+      "--ink": {
+        "value": "#20211f",
+        "source": "src/index.css"
+      },
+      "--gold": {
+        "value": "#9b7017",
+        "source": "src/index.css"
+      }
+    },
+    "typography": {
+      "--mono": {
+        "value": "DM Mono",
+        "source": "src/index.css"
+      }
+    },
+    "spacing": {},
+    "radius": {},
+    "shadows": {
+      "--shadow": {
+        "value": "rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px",
+        "source": "src/index.css"
+      }
+    },
+    "motion": {},
+    "density": "compact"
+  },
+  "components": {
+    "installed": ["button", "card", "badge", "table", "tabs", "tooltip", "native-select", "FadeContent"],
+    "preferredPrimitives": ["shadcn"],
+    "patterns": ["dense research terminal", "explicit signal gates", "tabbed methodology"]
+  },
+  "constraints": {
+    "must": ["Label synthetic data", "Support reduced motion", "Keep research decisions explainable"],
+    "avoid": ["Decorative finance gradients", "Unqualified trade alerts", "Motion that obscures data"]
+  },
+  "decisions": [
+    {
+      "decision": "Use shadcn MCP components as the primary UI source and React Bits only for restrained motion; use 21st.dev only for design context and review.",
+      "date": "2026-10-14"
+    },
+    {
+      "decision": "Use a warm editorial research-terminal visual system with off-white paper, ink, and restrained gold accents.",
+      "date": "2026-10-14"
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "design.colorMode:light-and-dark",
+      "source": "src/index.css"
+    },
+    {
+      "fact": "design.tokens",
+      "source": "src/index.css"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:vite",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-10-14T15:53:09.447Z"
+}
