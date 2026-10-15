@@ -1,38 +1,38 @@
 {
-  "content_sha256": "20e4e3b0c415db2c7fd4d364dbcd8dbf1871a8a38f0c9602c5638405d8a665ef",
+  "content_sha256": "68af0c873db5e08eefee9b8bf95e65ca9563e54445de536970922a745e25b9fd",
   "engine_version": "0.2.0",
-  "generated_at_utc": "2026-10-14T17:03:30.348357Z",
+  "generated_at_utc": "2026-10-15T05:33:08.966042Z",
   "international": {
     "gold_reference_inr_per_gram": {
       "calculation": "XAU/USD per troy ounce \u00d7 USD/INR \u00f7 31.1034768",
       "classification": "contextual reference; not an MCX settlement or executable price",
-      "fx_effective_date": "2026-10-14",
-      "gold_timestamp_utc": "2026-10-14T16:48:01.789970+00:00",
-      "value": "12495.15243582029389074600175"
+      "fx_effective_date": "2026-10-15",
+      "gold_timestamp_utc": "2026-10-15T05:18:02.165330+00:00",
+      "value": "12681.35613057894543802254287"
     },
     "gold_spot": {
-      "computed_at_utc": "2026-10-14T16:48:01.789970+00:00",
+      "computed_at_utc": "2026-10-15T05:18:02.165330+00:00",
       "is_stale": false,
-      "price_usd_per_gram": "131.2653895978600051554365138",
-      "price_usd_per_troy_ounce": "4082.81",
+      "price_usd_per_gram": "133.2915296466149404879392776",
+      "price_usd_per_troy_ounce": "4145.83",
       "source_url": "https://api.goldprice.dev/v1/prices?symbol=XAU-USD-SPOT&include=sources",
       "sources": [
         {
           "display_name": "Live spot",
-          "fetched_at": "2026-10-14T16:47:02.081965+00:00",
+          "fetched_at": "2026-10-15T05:17:02.059628+00:00",
           "is_stale": false,
-          "price": "4082.81",
+          "price": "4145.83",
           "source": "oracle.xau_usd",
-          "source_timestamp": "2026-10-14T16:47:00+00:00",
+          "source_timestamp": "2026-10-15T05:17:00+00:00",
           "unit": "troy_ounce"
         }
       ]
     },
     "usd_inr": {
-      "effective_date": "2026-10-14",
-      "rate": "95.19",
-      "requested_date": "2026-10-14",
-      "source_url": "https://api.frankfurter.dev/v2/rate/USD/INR?date=2026-10-14"
+      "effective_date": "2026-10-15",
+      "rate": "95.14",
+      "requested_date": "2026-10-15",
+      "source_url": "https://api.frankfurter.dev/v2/rate/USD/INR?date=2026-10-15"
     }
   },
   "mode": "SUPPLEMENTARY_REFERENCE",
@@ -41,8 +41,8 @@
       "authentication": "optional API key; keyless is 15-minute delayed",
       "coverage": "Free: latest spot and 30 days of daily XAU/USD bars",
       "id": "goldprice.dev",
-      "last_successful_update": "2026-10-14T17:03:30.348460Z",
-      "latest_observation": "2026-10-14T16:48:01.789970+00:00",
+      "last_successful_update": "2026-10-15T05:33:08.966136Z",
+      "latest_observation": "2026-10-15T05:18:02.165330+00:00",
       "limitations": "International reference spot, not MCX futures; free commercial use requires visible attribution",
       "status": "available"
     },
@@ -50,8 +50,8 @@
       "authentication": "none",
       "coverage": "Daily reference rates; historical coverage varies by contributing official source",
       "id": "frankfurter",
-      "last_successful_update": "2026-10-14T17:03:31.393408Z",
-      "latest_observation": "2026-10-14",
+      "last_successful_update": "2026-10-15T05:33:10.048266Z",
+      "latest_observation": "2026-10-15",
       "limitations": "Reference mid-market/blended rate, not an executable FX quote",
       "status": "available"
     },
