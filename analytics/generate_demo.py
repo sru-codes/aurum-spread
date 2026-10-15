@@ -151,5 +151,5 @@ def build_bundle() -> dict:
 if __name__ == "__main__":
     target = Path(__file__).resolve().parents[1] / "public" / "data" / "demo-research.v1.json"
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(build_bundle(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    target.write_text(json.dumps(build_bundle(), sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
     print(target)
