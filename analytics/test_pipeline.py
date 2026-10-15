@@ -67,6 +67,18 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(report["rows_accepted"], 1)
         self.assertEqual(len(report["issues"]), 1)
 
+    def test_empty_target_import_explains_rejection(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "no-target.csv"
+            self.write_export(source)
+            source.write_text(source.read_text().replace("GOLDTEN", "SILVER"), encoding="utf-8")
+            result = ingest_official_export(source, "14/10/2026", root / "workspace")
+            report = json.loads(result["report_path"].read_text())
+        self.assertEqual(result["status"], "rejected")
+        self.assertIsNone(result["cleaned_path"])
+        self.assertEqual(report["issues"][0]["code"], "no_target_rows")
+
     def test_refuses_non_csv_without_archiving_or_conversion(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "official.xls"

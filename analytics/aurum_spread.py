@@ -48,7 +48,19 @@ CONTRACT_SPECS: dict[str, tuple[ContractSpec, ...]] = {
             "GOLDM", Decimal("100"), Decimal("10"), Decimal("0.995"),
             "5th calendar day, or preceding working day", 3,
             date(2025, 3, 1),
-            "https://www.mcxindia.com/docs/default-source/about-us/gold-mini-march-2025-contract-onwards.pdf",
+            "https://www.mcxindia.com/products/bullion/gold-mini",
+        ),
+        ContractSpec(
+            "GOLDM", Decimal("100"), Decimal("10"), Decimal("0.995"),
+            "5th calendar day, or preceding working day", 3,
+            date(2025, 11, 1),
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-mini/gold-mini-november-2025-contract-onwardsfc22554857fb64e3bdfdff00007acb35.pdf",
+        ),
+        ContractSpec(
+            "GOLDM", Decimal("100"), Decimal("10"), Decimal("0.995"),
+            "5th calendar day, or preceding working day", 3,
+            date(2026, 5, 1),
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-mini/gold-mini-may-2026-contract-onwards.pdf",
         ),
         ContractSpec(
             "GOLDM", Decimal("100"), Decimal("10"), Decimal("0.995"),
@@ -62,7 +74,13 @@ CONTRACT_SPECS: dict[str, tuple[ContractSpec, ...]] = {
             "GOLDTEN", Decimal("10"), Decimal("10"), Decimal("0.999"),
             "last calendar day, or preceding working day", 3,
             date(2025, 4, 1),
-            "https://www.mcxindia.com/docs/default-source/about-us/gold-ten-april-2025-contract-onwards.pdf",
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-ten/gold-ten-april-2025-contract-onwards7fb63e4857fb64e3bdfdff00007acb3580008247-f6c1-4a56-be21-ac18ff0bdbe4.pdf",
+        ),
+        ContractSpec(
+            "GOLDTEN", Decimal("10"), Decimal("10"), Decimal("0.999"),
+            "last calendar day, or preceding working day", 3,
+            date(2025, 11, 1),
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-ten/gold-ten-november-2025-contract-onwards9a08564857fb64e3bdfdff00007acb35.pdf",
         ),
         ContractSpec(
             "GOLDTEN", Decimal("10"), Decimal("10"), Decimal("0.999"),
@@ -76,7 +94,13 @@ CONTRACT_SPECS: dict[str, tuple[ContractSpec, ...]] = {
             "GOLDGUINEA", Decimal("8"), Decimal("8"), Decimal("0.999"),
             "last calendar day, or preceding working day", 3,
             date(2025, 1, 1),
-            "https://www.mcxindia.com/docs/default-source/about-us/gold-guinea-january-2025-contract-onwards.pdf",
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-guinea/gold-guinea-january-2025-contract-onwards8992f3f6-d244-425a-9a53-66d94500bb34.pdf",
+        ),
+        ContractSpec(
+            "GOLDGUINEA", Decimal("8"), Decimal("8"), Decimal("0.999"),
+            "last calendar day, or preceding working day", 3,
+            date(2025, 12, 1),
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-guinea/gold-guinea-december-2025-contract-onwardsdc22554857fb64e3bdfdff00007acb35.pdf",
         ),
         ContractSpec(
             "GOLDGUINEA", Decimal("8"), Decimal("8"), Decimal("0.999"),
@@ -90,7 +114,13 @@ CONTRACT_SPECS: dict[str, tuple[ContractSpec, ...]] = {
             "GOLDPETAL", Decimal("1"), Decimal("1"), Decimal("0.999"),
             "last calendar day, or preceding working day", 3,
             date(2025, 4, 1),
-            "https://www.mcxindia.com/docs/default-source/about-us/gold-petal-april-2025-contracts-onwards.pdf",
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-petal/gold-petal-april-2025-contracts-onwards4b958087-3b38-44b0-abc2-30acd903c1ad.pdf",
+        ),
+        ContractSpec(
+            "GOLDPETAL", Decimal("1"), Decimal("1"), Decimal("0.999"),
+            "last calendar day, or preceding working day", 3,
+            date(2025, 12, 1),
+            "https://www.mcxindia.com/docs/default-source/products/contract-specification/gold-petal/gold-petal-december-2025-contracts-onwards7a08564857fb64e3bdfdff00007acb35.pdf",
         ),
         ContractSpec(
             "GOLDPETAL", Decimal("1"), Decimal("1"), Decimal("0.999"),

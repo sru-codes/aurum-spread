@@ -98,6 +98,13 @@ def ingest_official_export(
 
     result: IngestionResult = ingest_csv(raw_path, requested_date=requested_date)
     status = "accepted" if result.valid and result.observations else "rejected"
+    issues = [asdict(issue) for issue in result.issues]
+    if not result.observations:
+        issues.append({
+            "row_number": 0,
+            "code": "no_target_rows",
+            "message": "No valid target futures observations were found for the requested date.",
+        })
     report = {
         "schema_version": SCHEMA_VERSION,
         "dataset_id": dataset_id,
@@ -105,7 +112,7 @@ def ingest_official_export(
         "rows_seen": result.rows_seen,
         "rows_accepted": len(result.observations),
         "rows_ignored_non_target_symbols": result.rows_ignored,
-        "issues": [asdict(issue) for issue in result.issues],
+        "issues": issues,
         "policy": {
             "missing_values_imputed": False,
             "duplicate_contract_keys_allowed": False,

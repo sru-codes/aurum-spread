@@ -37,6 +37,8 @@ Always retain the exact specification PDF or circular effective for the historic
 
 All four current specifications use compulsory delivery and a staggered tender period covering the last three trading days, including expiry. The research gate uses a configurable conservative calendar-day buffer because a verified historical exchange-session calendar has not yet been imported. It must not claim exact tender-session eligibility until that calendar is present.
 
+Specifications are selected by contract expiry from an effective-dated registry: GOLDM March 2025, November 2025, May 2026, and August 2026; GOLDTEN April 2025, November 2025, and July 2026; GOLDGUINEA January 2025, December 2025, and July 2026; GOLDPETAL April 2025, December 2025, and July 2026. Each version retains the official MCX PDF link where available. The [MCX bullion product page](https://www.mcxindia.com/en/products/bullion/gold) is the index for current documents and can change; verify an applicable circular and source PDF before extending the registry to a new historical period.
+
 For each close:
 
 ```text

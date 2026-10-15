@@ -87,6 +87,10 @@ class AurumSpreadTests(unittest.TestCase):
         self.assertEqual(current.trading_unit_grams, Decimal("100"))
         self.assertEqual(current.quoted_grams, Decimal("10"))
         self.assertEqual(current.purity, Decimal("0.995"))
+        self.assertEqual(contract_spec("GOLDM", date(2026, 7, 1)).effective_expiry_from, date(2026, 5, 1))
+        self.assertEqual(contract_spec("GOLDTEN", date(2026, 1, 30)).effective_expiry_from, date(2025, 11, 1))
+        self.assertEqual(contract_spec("GOLDGUINEA", date(2026, 1, 30)).effective_expiry_from, date(2025, 12, 1))
+        self.assertEqual(contract_spec("GOLDPETAL", date(2026, 1, 30)).effective_expiry_from, date(2025, 12, 1))
         with self.assertRaises(DataQualityError):
             contract_spec("GOLDTEN", date(2025, 3, 31))
 

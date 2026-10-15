@@ -130,6 +130,10 @@ class ResearchTests(unittest.TestCase):
         first = build_research_snapshot(points, simulation, config, costs, {"raw_sha256": "abc"}, sensitivity)
         second = build_research_snapshot(points, simulation, config, costs, {"raw_sha256": "abc"}, sensitivity)
         self.assertEqual(first["content_sha256"], second["content_sha256"])
+        self.assertEqual(first["pair"]["candidate_symbol"], "GOLDTEN")
+        self.assertEqual(first["contract_specifications"]["candidate"]["quoted_grams"], "10")
+        self.assertEqual(len(first["partition_simulations"]["test"]["daily"]), 5)
+        self.assertEqual(len(first["partition_cost_sensitivity"]["test"]), 3)
 
     def test_insufficient_history_never_forces_a_signal(self) -> None:
         observations, candidate_expiry, reference_expiry = self.series(count=4, shock_index=3)

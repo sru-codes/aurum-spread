@@ -470,11 +470,37 @@ def build_research_snapshot(
     points: Sequence[SpreadPoint], simulation: SimulationResult, config: ResearchConfig,
     costs: CostModel, lineage: dict[str, Any], sensitivity: Sequence[dict[str, float]],
 ) -> dict[str, Any]:
+    if not points:
+        raise ValueError("cannot build a research snapshot without spread points")
+    candidate_spec = contract_spec(points[0].candidate.symbol, points[0].candidate.expiry_date)
+    reference_spec = contract_spec(points[0].reference.symbol, points[0].reference.expiry_date)
+    partitions = {
+        name: [point for point in points if point.partition == name]
+        for name in ("train", "validation", "test")
+    }
+    partition_simulations = {
+        name: _serializable(simulate_contracts(selected, config, costs))
+        for name, selected in partitions.items() if selected
+    }
+    partition_cost_sensitivity = {
+        name: cost_sensitivity(selected, config, costs, [item["slippage_bps"] for item in sensitivity])
+        for name, selected in partitions.items() if selected
+    }
     snapshot: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "engine_version": ENGINE_VERSION,
         "mode": "VERIFIED_HISTORICAL",
         "lineage": lineage,
+        "pair": {
+            "candidate_symbol": points[0].candidate.symbol,
+            "candidate_expiry": points[0].candidate.expiry_date.isoformat(),
+            "reference_symbol": points[0].reference.symbol,
+            "reference_expiry": points[0].reference.expiry_date.isoformat(),
+        },
+        "contract_specifications": {
+            "candidate": _serializable(candidate_spec),
+            "reference": _serializable(reference_spec),
+        },
         "configuration": _serializable(config),
         "cost_assumptions": _serializable(costs),
         "methodology": {
@@ -487,6 +513,8 @@ def build_research_snapshot(
         },
         "series": _serializable(points),
         "simulation": _serializable(simulation),
+        "partition_simulations": partition_simulations,
+        "partition_cost_sensitivity": partition_cost_sensitivity,
         "cost_sensitivity": _serializable(sensitivity),
     }
     snapshot["content_sha256"] = sha256_bytes(canonical_json(snapshot).encode("utf-8"))
