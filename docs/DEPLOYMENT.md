@@ -16,8 +16,8 @@ No application secrets are required for the synthetic MVP. If future browser con
 ## Local production test
 
 ```bash
-docker build -t aurum-spread:0.1.0 .
-docker run --rm -e PORT=3000 -p 3000:3000 aurum-spread:0.1.0
+docker build -t aurum-spread:0.2.0 .
+docker run --rm -e PORT=3000 -p 3000:3000 aurum-spread:0.2.0
 curl --fail http://localhost:3000/health
 ```
 

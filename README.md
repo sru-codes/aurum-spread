@@ -35,6 +35,7 @@ Production checks:
 ```bash
 npm run build
 npm run lint
+npm test
 python3 -m unittest discover -s analytics -v
 npm audit --audit-level=high
 ```
@@ -51,11 +52,10 @@ Connect `sru-codes/aurum-spread` from Railway's **Deploy from GitHub repo** flow
 src/                    React product prototype
   components/ui/        shadcn registry components
   components/           React Bits component
-  data/demo.ts           explicitly synthetic UI fixture
-  lib/analytics.ts       browser-side normalization helpers
+  lib/                   typed artifact contracts and browser analytics
 analytics/              auditable Python research core, importer, and tests
 data/                    lineage manifests, validation reports, and cleaned outputs
-public/data/             browser-safe, dated analytical/context snapshots
+public/data/             browser-safe demo research and contextual snapshots
 docs/RESEARCH.md         data, methodology, risks, and build plan
 docs/ARCHITECTURE.md     data paths, trust boundaries, and storage decisions
 docs/DATA_PROVIDERS.md   provider setup, verified limits, and credentials
@@ -93,7 +93,7 @@ International spot and FX context are deliberately separate from MCX contract an
 
 ## Project status
 
-Current release: **v0.1.0 — Research Prototype**.
+Current release: **v0.2.0 — Data-Lineage Research Prototype**.
 
 The dashboard and analytical mechanics are functional, but the displayed observations remain synthetic until a user-supplied official MCX export passes the importer and a frozen historical holdout is completed. Automated access to MCX was blocked from the current build environment, and no substitute source has been presented as verified data. See the [analytics guide](analytics/README.md), [changelog](CHANGELOG.md), [versioning policy](docs/VERSIONING.md), [security policy](SECURITY.md), and [contribution guide](CONTRIBUTING.md).
 

@@ -23,6 +23,24 @@
   --mono: 'DM Mono', monospace;
 }
 
+:root[data-theme='dark'] {
+  color: #ece8dd;
+  background: #141512;
+  --paper: #1c1d19;
+  --paper-deep: #141512;
+  --ink: #ece8dd;
+  --muted: #aaa99f;
+  --line: #34352f;
+  --line-dark: #4a4b43;
+  --gold: #d1a747;
+  --gold-bright: #e0b653;
+  --gold-soft: #382f1d;
+  --green: #79aa84;
+  --green-soft: #203328;
+  --red: #d4887a;
+  --red-soft: #3a2521;
+}
+
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--paper-deep); }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
