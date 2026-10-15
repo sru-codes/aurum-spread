@@ -4,6 +4,10 @@ All notable changes to Aurum Spread are documented here. The project follows [Se
 
 ## [Unreleased]
 
+### Added
+
+- GitHub Actions CI for frontend/Python tests and Railway image runtime smoke tests
+
 ### Remaining
 
 - Import and freeze an official MCX historical sample; none was supplied or accessible in the current environment

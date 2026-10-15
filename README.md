@@ -1,6 +1,7 @@
 # Aurum Spread
 
 [![Release](https://img.shields.io/github/v/release/sru-codes/aurum-spread?display_name=tag)](https://github.com/sru-codes/aurum-spread/releases)
+[![CI](https://github.com/sru-codes/aurum-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/sru-codes/aurum-spread/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-9b7017.svg)](LICENSE.md)
 [![Hackathon](https://img.shields.io/badge/Hack%20in%20Hills-'26-20211f.svg)](docs/RESEARCH.md)
 
