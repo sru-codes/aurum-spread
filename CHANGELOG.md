@@ -7,6 +7,8 @@ All notable changes to Aurum Spread are documented here. The project follows [Se
 ### Added
 
 - GitHub Actions CI for frontend/Python tests and Railway image runtime smoke tests
+- Plain-language story landing page at `/` with the research terminal available at `/dashboard`
+- Accessible GSAP/ScrollTrigger reveals and Lenis scrolling with reduced-motion support
 
 ### Remaining
 

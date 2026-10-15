@@ -5,6 +5,7 @@ import {
   ShieldCheck, Sun, TrendingUp, XCircle,
 } from 'lucide-react'
 import FadeContent from '@/components/FadeContent'
+import LandingPage from '@/LandingPage'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -242,7 +243,7 @@ function SourceCenter({ bundle, context, now }: { bundle: ResearchBundle, contex
   const providers = [mcx, ...providerRows]
   return <section className="source-page"><div className="page-intro"><span className="eyebrow">Quality and provenance</span><h2>Every source declares what it can—and cannot—prove.</h2><p>Provider failures are isolated. Supplementary context can disappear without changing contract research or inventing a replacement.</p></div>
     <Card className="source-table-card"><CardContent><Table><TableHeader><TableRow><TableHead>Provider</TableHead><TableHead>Status</TableHead><TableHead>Latest observation</TableHead><TableHead>Authentication</TableHead><TableHead>Coverage</TableHead><TableHead>Known limitation</TableHead></TableRow></TableHeader><TableBody>{providers.map((provider) => <TableRow key={provider.id}><TableCell><strong>{provider.id}</strong></TableCell><TableCell><Badge variant="outline" className={provider.status === 'available' ? 'badge-pass' : provider.status === 'error' ? 'badge-watch' : 'badge-neutral'}>{provider.status.replaceAll('_', ' ')}</Badge></TableCell><TableCell>{dateTime(provider.latest_observation)}</TableCell><TableCell>{provider.authentication}</TableCell><TableCell>{provider.coverage}</TableCell><TableCell>{provider.limitations}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
-    <div className="quality-grid"><Card><CardContent><ShieldCheck size={18} /><h3>Research identity</h3><code>{bundle.content_sha256}</code><p>SHA-256 declared by the generated artifact. For verified use, reconcile it with the local manifest and raw archive.</p></CardContent></Card><Card><CardContent><Database size={18} /><h3>Import policy</h3><p>Target futures rows are never silently dropped, duplicate keys abort a merge, and rejected daily imports do not publish clean data.</p></CardContent></Card><Card><CardContent><CalendarClock size={18} /><h3>Refresh model</h3><p>Railway serves static snapshots. Refresh reloads those artifacts; provider jobs run explicitly in Python and never expose API keys to the browser.</p></CardContent></Card></div>
+    <div className="quality-grid"><Card><CardContent><ShieldCheck size={18} /><h3>Research identity</h3><code>{bundle.content_sha256}</code><p>SHA-256 declared by the generated artifact. For verified use, reconcile it with the local manifest and raw archive.</p></CardContent></Card><Card><CardContent><Database size={18} /><h3>Import policy</h3><p>Target futures rows are never silently dropped, duplicate keys abort a merge, and rejected daily imports do not publish clean data.</p></CardContent></Card><Card><CardContent><CalendarClock size={18} /><h3>Refresh model</h3><p>Published artifacts load in the browser. Authorized service operators can run provider refreshes on the Python API; keys stay server-side.</p></CardContent></Card></div>
   </section>
 }
 
@@ -266,7 +267,7 @@ function EmptyState({ title, copy }: { title: string, copy: string }) {
   return <div className="state-panel" role="alert"><AlertTriangle size={20} /><h2>{title}</h2><p>{copy}</p></div>
 }
 
-function App() {
+function DashboardApp() {
   const [bundle, setBundle] = useState<ResearchBundle | null>(null)
   const [context, setContext] = useState<ContextSnapshot | null>(null)
   const [researchState, setResearchState] = useState<LoadState>('loading')
@@ -354,8 +355,12 @@ function App() {
         <TabsContent value="method"><Methodology /></TabsContent>
       </Tabs>
     </main>
-    <footer><span>Aurum Spread v0.2.0 · Hack in Hills ’26</span><span>Research and education only · No broker execution</span></footer>
+    <footer><span>Aurum Spread v0.3.0 · Hack in Hills ’26</span><span>Research and education only · No broker execution</span></footer>
   </div></TooltipProvider>
+}
+
+function App() {
+  return window.location.pathname.replace(/\/$/, '') === '/dashboard' ? <DashboardApp /> : <LandingPage />
 }
 
 export default App

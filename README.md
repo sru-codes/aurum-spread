@@ -12,6 +12,7 @@ The central product decision is deliberate: **a large spread is not automaticall
 ## What is working
 
 - Responsive React dashboard with pair and lookback controls
+- Plain-language, scroll-led landing page at `/` with the research terminal at `/dashboard`
 - Contract-level normalization and eligibility display
 - Explainable signal gates: statistics, expiry, liquidity, and costs
 - Walk-forward attribution view separating gross convergence from costs
