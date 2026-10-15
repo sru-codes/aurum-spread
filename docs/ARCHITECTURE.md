@@ -18,9 +18,17 @@ Supplementary APIs
   → explicit unit/time normalization
   → contextual snapshot
   → React Global Gold / Data Source views
+
+Independent Gold API service
+  → scheduled goldprice.dev / Frankfurter / optional FRED and GNews refresh
+  → versioned public read-only snapshot (`/api/v1/snapshot`)
+  → TypeScript schema validation in the browser
+  → Global Gold / Data Source context panels
 ```
 
 MCX observations and contextual API observations never share an implicit price type. MCX rows are domestic exchange futures contracts identified by trading date, symbol, and expiry. Goldprice.dev observations are international XAU/USD spot references; Frankfurter observations are daily reference FX. Context providers cannot replace a missing MCX record.
+
+The separately deployed [`sru-codes/gold-api`](https://github.com/sru-codes/gold-api) service is an optional-at-runtime read-only context feed. The dashboard fetches its versioned snapshot directly from `VITE_GOLD_API_URL` (default `https://goldapi.up.railway.app`), validates the shape and units, and refreshes its view on a one-minute interval. It does not send credentials, trigger the service's refresh route, or pass international prices into the MCX research engine. An unavailable or malformed feed leaves the MCX monitor intact and falls back to Aurum's last published context when possible.
 
 ## Runtime model
 

@@ -2,6 +2,19 @@
 
 Provider capabilities and limits were verified against their official documentation on 14 October 2026.
 
+## Gold API — hosted context aggregator
+
+- Repository: [sru-codes/gold-api](https://github.com/sru-codes/gold-api)
+- Deployed service: [goldapi.up.railway.app](https://goldapi.up.railway.app/)
+- Dashboard endpoint: `GET /api/v1/snapshot` (public read-only; no browser credential)
+- Aurum configuration: `VITE_GOLD_API_URL` (defaults to the deployed service URL)
+- Role: aggregate international XAU/USD spot, USD/INR reference FX, closed daily bars, provider health, and optional macro/news context
+- Observed service state on 15 October 2026: `/health` reported `ok`, the snapshot reported `LIVE`, and the browser origin was accepted by CORS. Availability can change; the dashboard validates the response and degrades gracefully.
+- Boundary: this is a separate Railway service. It is not an MCX data provider, and its prices never replace or enter the MCX futures signal calculation.
+- Optional service-side credentials: `GOLDPRICE_API_KEY`, `FRED_API_KEY`, and `GNEWS_API_KEY` belong in the Gold API Railway variables only. They are not needed in the Aurum browser.
+
+The Gold API currently refreshes its own provider snapshot. Aurum's **Refresh view** button fetches the newest published snapshot; it does not force a third-party refresh.
+
 ## MCX India — authoritative futures source
 
 - Source: [MCX Bhavcopy](https://www.mcxindia.com/market-data/bhavcopy)

@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity, AlertTriangle, CalendarClock, CheckCircle2,
-  CircleHelp, Code2, Database, Download, FileUp, Globe2, Info, RefreshCw,
+  CircleHelp, Code2, Database, Download, FileUp, Info, RefreshCw,
   ShieldCheck, TrendingUp, XCircle,
 } from 'lucide-react'
 import FadeContent from '@/components/FadeContent'
+import GoldContextPanel from '@/components/GoldContextPanel'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import {
   type ResearchSnapshot,
 } from '@/lib/data-contracts'
 import { formatIndianCurrency, formatNumber } from '@/lib/analytics'
+import { useGoldApi } from '@/hooks/useGoldApi'
 import './App.css'
 
 type LoadState = 'loading' | 'ready' | 'error'
@@ -202,32 +204,8 @@ function ResearchTerminal({ bundle, onDownload }: { bundle: ResearchBundle, onDo
   </FadeContent>
 }
 
-function GlobalIntelligence({ context, state, now }: { context: ContextSnapshot | null, state: LoadState, now: number }) {
-  if (state === 'loading') return <LoadingState copy="Loading attributed reference-market context…" />
-  if (state === 'error' || !context) return <EmptyState title="Reference providers unavailable" copy="MCX research remains usable. Run the Python context refresh when provider access returns." />
-  const spot = context.international.gold_spot
-  const fx = context.international.usd_inr
-  const reference = context.international.gold_reference_inr_per_gram
-  const snapshotAgeMs = now - Date.parse(context.generated_at_utc)
-  const spotIsStale = Boolean(spot && (spot.is_stale || snapshotAgeMs > 30 * 60_000))
-  return <section className="context-page">
-    <div className="page-intro"><span className="eyebrow">Supplementary market context</span><h2>Global gold, without confusing it for MCX.</h2><p>XAU/USD spot and USD/INR are reference observations. They can explain a domestic basis, but they are never substituted for a missing futures contract.</p></div>
-    <div className="context-metrics">
-      <MetricCard label="XAU/USD spot reference" value={spot ? `$${Number(spot.price_usd_per_troy_ounce).toLocaleString('en-US', { maximumFractionDigits: 2 })}` : 'Unavailable'} detail={spot ? `per troy ounce · ${spotIsStale ? 'snapshot stale' : '15-minute delayed free tier'}` : 'No observation'} tone={spotIsStale ? 'warning' : 'default'} icon={<Globe2 size={16} />} />
-      <MetricCard label="USD/INR reference" value={fx ? Number(fx.rate).toFixed(2) : 'Unavailable'} detail={fx ? `effective ${fx.effective_date}` : 'No observation'} icon={<TrendingUp size={16} />} />
-      <MetricCard label="Converted gold reference" value={reference ? formatIndianCurrency(Number(reference.value), 2) : 'Unavailable'} detail="Per gram · contextual calculation" tone="warning" icon={<Activity size={16} />} />
-    </div>
-    <Card className="context-detail"><CardHeader className="section-heading"><div><CardTitle>Reference calculation</CardTitle><p>Units and effective dates remain explicit</p></div><Badge variant="outline">SUPPLEMENTARY</Badge></CardHeader><CardContent>
-      <code>{reference?.calculation ?? 'Waiting for both XAU/USD and USD/INR'}</code>
-      <div className="context-grid"><div><span>Gold timestamp</span><strong>{reference ? dateTime(reference.gold_timestamp_utc) : '—'}</strong></div><div><span>FX effective date</span><strong>{reference?.fx_effective_date ?? '—'}</strong></div><div><span>Context artifact generated</span><strong>{dateTime(context.generated_at_utc)}</strong></div><div><span>Gold source type</span><strong>International spot reference</strong></div><div><span>Domestic source type</span><strong>MCX futures · separate dataset</strong></div></div>
-      <p>{reference?.classification}</p>
-    </CardContent></Card>
-    <p className="attribution-credit">Reference gold data by <a href="https://goldprice.dev" target="_blank" rel="noreferrer">goldprice.dev</a>. FX reference by <a href="https://frankfurter.dev" target="_blank" rel="noreferrer">Frankfurter</a>.</p>
-  </section>
-}
-
-function SourceCenter({ bundle, context, now }: { bundle: ResearchBundle, context: ContextSnapshot | null, now: number }) {
-  const providerRows = (context?.providers ?? []).map((provider) => {
+function SourceCenter({ bundle, context, goldApi, now }: { bundle: ResearchBundle, context: ContextSnapshot | null, goldApi: ReturnType<typeof useGoldApi>, now: number }) {
+  const providerRows = (goldApi.snapshot?.providers ?? context?.providers ?? []).map((provider) => {
     const refreshed = provider.last_successful_update ? Date.parse(provider.last_successful_update) : NaN
     const staleAfter = provider.id === 'goldprice.dev' ? 30 * 60_000 : 36 * 60 * 60_000
     return provider.status === 'available' && Number.isFinite(refreshed) && now - refreshed > staleAfter
@@ -241,7 +219,15 @@ function SourceCenter({ bundle, context, now }: { bundle: ResearchBundle, contex
     coverage: bundle.mode === 'VERIFIED_HISTORICAL' ? 'Loaded research snapshot' : 'No verified history committed',
     limitations: bundle.mode === 'VERIFIED_HISTORICAL' ? 'Closing values are not guaranteed fills' : 'Automated MCX access blocked; demo data remains synthetic',
   }
-  const providers = [mcx, ...providerRows]
+  const goldApiProvider = {
+    id: 'Gold API · sru-codes/gold-api', status: goldApi.snapshot?.mode === 'LIVE' ? 'available' : goldApi.snapshot?.mode === 'PARTIAL' ? 'partial' : goldApi.snapshot?.mode === 'DEGRADED' ? 'error' : goldApi.state === 'error' ? 'unavailable' : 'connecting',
+    latest_observation: goldApi.snapshot?.sections.gold.data?.computed_at_utc ?? goldApi.snapshot?.generated_at_utc ?? null,
+    last_successful_update: goldApi.snapshot?.generated_at_utc ?? null,
+    authentication: 'Public read-only GET · no client credential',
+    coverage: 'XAU/USD, USD/INR, closed daily bars, optional macro and news',
+    limitations: 'International/reference context only · does not supply MCX futures observations',
+  }
+  const providers = [mcx, goldApiProvider, ...providerRows]
   return <section className="source-page"><div className="page-intro"><span className="eyebrow">Quality and provenance</span><h2>Every source declares what it can—and cannot—prove.</h2><p>Provider failures are isolated. Supplementary context can disappear without changing contract research or inventing a replacement.</p></div>
     <Card className="source-table-card"><CardContent><Table><TableHeader><TableRow><TableHead>Provider</TableHead><TableHead>Status</TableHead><TableHead>Latest observation</TableHead><TableHead>Authentication</TableHead><TableHead>Coverage</TableHead><TableHead>Known limitation</TableHead></TableRow></TableHeader><TableBody>{providers.map((provider) => <TableRow key={provider.id}><TableCell><strong>{provider.id}</strong></TableCell><TableCell><Badge variant="outline" className={provider.status === 'available' ? 'badge-pass' : provider.status === 'error' ? 'badge-watch' : 'badge-neutral'}>{provider.status.replaceAll('_', ' ')}</Badge></TableCell><TableCell>{dateTime(provider.latest_observation)}</TableCell><TableCell>{provider.authentication}</TableCell><TableCell>{provider.coverage}</TableCell><TableCell>{provider.limitations}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
     <div className="quality-grid"><Card><CardContent><ShieldCheck size={18} /><h3>Research identity</h3><code>{bundle.content_sha256}</code><p>SHA-256 declared by the generated artifact. For verified use, reconcile it with the local manifest and raw archive.</p></CardContent></Card><Card><CardContent><Database size={18} /><h3>Import policy</h3><p>Target futures rows are never silently dropped, duplicate keys abort a merge, and rejected daily imports do not publish clean data.</p></CardContent></Card><Card><CardContent><CalendarClock size={18} /><h3>Refresh model</h3><p>Published artifacts load in the browser. Authorized service operators can run provider refreshes on the Python API; keys stay server-side.</p></CardContent></Card></div>
@@ -271,8 +257,8 @@ function EmptyState({ title, copy }: { title: string, copy: string }) {
 function DashboardApp() {
   const [bundle, setBundle] = useState<ResearchBundle | null>(null)
   const [context, setContext] = useState<ContextSnapshot | null>(null)
+  const goldApi = useGoldApi()
   const [researchState, setResearchState] = useState<LoadState>('loading')
-  const [contextState, setContextState] = useState<LoadState>('loading')
   const [message, setMessage] = useState('Loading versioned artifacts…')
   const [now, setNow] = useState(() => Date.now())
   const inputRef = useRef<HTMLInputElement>(null)
@@ -280,7 +266,6 @@ function DashboardApp() {
   const loadArtifacts = useCallback(async (bustCache = false) => {
     const suffix = bustCache ? `?t=${Date.now()}` : ''
     setResearchState('loading')
-    setContextState('loading')
     const [researchResult, contextResult] = await Promise.allSettled([
       fetch(`/api/research${suffix}`).then((response) => {
         if (!response.ok) throw new Error(`Research artifact HTTP ${response.status}`)
@@ -301,9 +286,8 @@ function DashboardApp() {
     }
     if (contextResult.status === 'fulfilled') {
       setContext(contextResult.value)
-      setContextState('ready')
     } else {
-      setContextState('error')
+      setContext(null)
     }
     setMessage(`Artifacts checked · ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`)
     setNow(Date.now())
@@ -341,12 +325,12 @@ function DashboardApp() {
   }
 
   return <TooltipProvider><div className="app-shell">
-    <header className="topbar"><div className="brand-block"><div className="brand-mark" aria-hidden="true">Au</div><div><strong>Aurum Spread</strong><span>Commodity derivatives intelligence</span></div></div><div className="header-actions"><div className="data-state"><span className={bundle?.mode === 'VERIFIED_HISTORICAL' ? 'verified-dot' : ''} /><div><strong>{bundle?.mode === 'VERIFIED_HISTORICAL' ? 'Verified historical' : 'Research demo'}</strong><small aria-live="polite">{message}</small></div></div><input ref={inputRef} type="file" accept="application/json,.json" className="sr-only" onChange={importSnapshot} /><Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}><FileUp size={14} /> Import snapshot</Button><Button variant="outline" size="sm" onClick={() => void loadArtifacts(true)}><RefreshCw size={14} /> Refresh artifacts</Button><Tooltip><TooltipTrigger asChild><ThemeToggle /></TooltipTrigger><TooltipContent>Cycle system, light, and dark themes</TooltipContent></Tooltip></div></header>
+    <header className="topbar"><div className="brand-block"><div className="brand-mark" aria-hidden="true">Au</div><div><strong>Aurum Spread</strong><span>Commodity derivatives intelligence</span></div></div><div className="header-actions"><div className="data-state"><span className={bundle?.mode === 'VERIFIED_HISTORICAL' ? 'verified-dot' : ''} /><div><strong>{bundle?.mode === 'VERIFIED_HISTORICAL' ? 'Verified historical' : 'Research demo'}</strong><small aria-live="polite">{message}</small></div></div><input ref={inputRef} type="file" accept="application/json,.json" className="sr-only" onChange={importSnapshot} /><Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}><FileUp size={14} /> Import snapshot</Button><Button variant="outline" size="sm" onClick={() => { void loadArtifacts(true); void goldApi.refresh() }}><RefreshCw size={14} /> Refresh view</Button><Tooltip><TooltipTrigger asChild><ThemeToggle /></TooltipTrigger><TooltipContent>Cycle system, light, and dark themes</TooltipContent></Tooltip></div></header>
     <main><section className="hero-copy"><div><span className="eyebrow">Hack in Hills ’26 · Problem 03</span><h1>Find the spread.<br /><em>Prove the edge.</em></h1></div><p>A defensible monitor for MCX gold futures—expiry-aware, normalized for fine gold, and evaluated without hindsight. Context is global; evidence stays contract-specific.</p></section>
       <Tabs defaultValue="monitor"><div className="nav-row"><TabsList variant="line" aria-label="Product sections"><TabsTrigger value="monitor">Futures monitor</TabsTrigger><TabsTrigger value="global">Global gold</TabsTrigger><TabsTrigger value="sources">Data sources</TabsTrigger><TabsTrigger value="method">Methodology</TabsTrigger></TabsList><a className="repo-link" href="https://github.com/sru-codes/aurum-spread" target="_blank" rel="noreferrer"><Code2 size={15} /> Repository</a></div>
         <TabsContent value="monitor">{researchState === 'loading' ? <LoadingState copy="Loading the Python service research artifact…" /> : researchState === 'error' || !bundle ? <EmptyState title="Research service unavailable" copy="Check /health and the Railway service logs, or load a generated snapshot from your machine." /> : <ResearchTerminal key={bundle.content_sha256} bundle={bundle} onDownload={download} />}</TabsContent>
-        <TabsContent value="global"><GlobalIntelligence context={context} state={contextState} now={now} /></TabsContent>
-        <TabsContent value="sources">{bundle ? <SourceCenter bundle={bundle} context={context} now={now} /> : <EmptyState title="No lineage loaded" copy="Load a research artifact to inspect provenance." />}</TabsContent>
+        <TabsContent value="global"><GoldContextPanel snapshot={goldApi.snapshot} state={goldApi.state} error={goldApi.error} fallback={context} onRefresh={() => void goldApi.refresh()} /></TabsContent>
+        <TabsContent value="sources">{bundle ? <SourceCenter bundle={bundle} context={context} goldApi={goldApi} now={now} /> : <EmptyState title="No lineage loaded" copy="Load a research artifact to inspect provenance." />}</TabsContent>
         <TabsContent value="method"><Methodology /></TabsContent>
       </Tabs>
     </main>
