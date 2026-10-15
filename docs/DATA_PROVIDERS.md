@@ -61,4 +61,4 @@ python3 analytics/refresh_context.py \
   --cache-dir .cache/providers
 ```
 
-The command succeeds with partial provider availability and records each provider's health. It never invents a missing observation. The committed context snapshot is a dated, static reference; the browser refresh control reloads artifacts but does not pretend to call a server that is not deployed.
+The command succeeds with partial provider availability and records each provider's health. It never invents a missing observation. On Railway, the authenticated `refresh-context` operator command refreshes providers server-side and publishes the resulting snapshot to the persistent volume. The dashboard's refresh button fetches the current API artifacts; it does not expose credentials or trigger an unauthenticated provider call.

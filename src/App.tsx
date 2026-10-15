@@ -281,11 +281,13 @@ function App() {
     setResearchState('loading')
     setContextState('loading')
     const [researchResult, contextResult] = await Promise.allSettled([
-      fetch(`/data/demo-research.v1.json${suffix}`).then((response) => {
+      fetch(`/api/research${suffix}`).then((response) => {
         if (!response.ok) throw new Error(`Research artifact HTTP ${response.status}`)
         return response.json()
-      }).then(parseResearchBundle),
-      fetch(`/data/context.v1.json${suffix}`).then((response) => {
+      }).then((value: unknown) => typeof value === 'object' && value !== null && 'analyses' in value
+        ? parseResearchBundle(value)
+        : bundleFromSnapshot(parseResearchSnapshot(value))),
+      fetch(`/api/context${suffix}`).then((response) => {
         if (!response.ok) throw new Error(`Context artifact HTTP ${response.status}`)
         return response.json()
       }).then(parseContextSnapshot),
@@ -346,7 +348,7 @@ function App() {
     <header className="topbar"><div className="brand-block"><div className="brand-mark" aria-hidden="true">Au</div><div><strong>Aurum Spread</strong><span>Commodity derivatives intelligence</span></div></div><div className="header-actions"><div className="data-state"><span className={bundle?.mode === 'VERIFIED_HISTORICAL' ? 'verified-dot' : ''} /><div><strong>{bundle?.mode === 'VERIFIED_HISTORICAL' ? 'Verified historical' : 'Research demo'}</strong><small aria-live="polite">{message}</small></div></div><input ref={inputRef} type="file" accept="application/json,.json" className="sr-only" onChange={importSnapshot} /><Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}><FileUp size={14} /> Import snapshot</Button><Button variant="outline" size="sm" onClick={() => void loadArtifacts(true)}><RefreshCw size={14} /> Refresh artifacts</Button><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon-sm" onClick={() => setDark((value) => !value)} aria-label={`Use ${dark ? 'light' : 'dark'} theme`}>{dark ? <Sun size={16} /> : <Moon size={16} />}</Button></TooltipTrigger><TooltipContent>{dark ? 'Light theme' : 'Dark theme'}</TooltipContent></Tooltip></div></header>
     <main><section className="hero-copy"><div><span className="eyebrow">Hack in Hills ’26 · Problem 03</span><h1>Find the spread.<br /><em>Prove the edge.</em></h1></div><p>A defensible monitor for MCX gold futures—expiry-aware, normalized for fine gold, and evaluated without hindsight. Context is global; evidence stays contract-specific.</p></section>
       <Tabs defaultValue="monitor"><div className="nav-row"><TabsList variant="line" aria-label="Product sections"><TabsTrigger value="monitor">Futures monitor</TabsTrigger><TabsTrigger value="global">Global gold</TabsTrigger><TabsTrigger value="sources">Data sources</TabsTrigger><TabsTrigger value="method">Methodology</TabsTrigger></TabsList><a className="repo-link" href="https://github.com/sru-codes/aurum-spread" target="_blank" rel="noreferrer"><Code2 size={15} /> Repository</a></div>
-        <TabsContent value="monitor">{researchState === 'loading' ? <LoadingState copy="Loading the deterministic engine output…" /> : researchState === 'error' || !bundle ? <EmptyState title="Research artifact unavailable" copy="Run analytics/generate_demo.py or import a generated verified snapshot." /> : <ResearchTerminal key={bundle.content_sha256} bundle={bundle} onDownload={download} />}</TabsContent>
+        <TabsContent value="monitor">{researchState === 'loading' ? <LoadingState copy="Loading the Python service research artifact…" /> : researchState === 'error' || !bundle ? <EmptyState title="Research service unavailable" copy="Check /health and the Railway service logs, or load a generated snapshot from your machine." /> : <ResearchTerminal key={bundle.content_sha256} bundle={bundle} onDownload={download} />}</TabsContent>
         <TabsContent value="global"><GlobalIntelligence context={context} state={contextState} now={now} /></TabsContent>
         <TabsContent value="sources">{bundle ? <SourceCenter bundle={bundle} context={context} now={now} /> : <EmptyState title="No lineage loaded" copy="Load a research artifact to inspect provenance." />}</TabsContent>
         <TabsContent value="method"><Methodology /></TabsContent>

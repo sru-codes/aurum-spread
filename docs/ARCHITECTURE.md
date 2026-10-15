@@ -24,9 +24,9 @@ MCX observations and contextual API observations never share an implicit price t
 
 ## Runtime model
 
-The deployable application is a static Vite build served by Caddy on Railway. Python jobs run before deployment or as an explicit refresh job and publish immutable JSON snapshots under `public/data/`. API secrets are read only by Python from environment variables and are never exposed through `VITE_` variables or browser bundles.
+The deployable application runs Caddy and a dependency-free Python HTTP API in one Railway container. Caddy serves the Vite build and proxies same-origin API requests. The API reads immutable demo/context artifacts from the image until new snapshots are published, then reads the current versions from `/app/data/published/`. A Railway volume mounted at `/app/data` preserves raw MCX files, manifests, validation reports, clean datasets, caches, and generated snapshots across deployments. API secrets are read only by Python from Railway variables and never appear in browser bundles.
 
-The dashboard can also load a generated research snapshot from the user's machine. It does not send the file to a server. Official raw CSV validation remains a Python pipeline responsibility so browser code cannot create a false `VERIFIED HISTORICAL` claim.
+The dashboard can also load a generated research snapshot from the user's machine; that file remains in the browser. Server-side writes use bearer authentication (`AURUM_ADMIN_TOKEN`) and are operated through `scripts/railway_admin.py`. Official raw CSV validation remains a Python pipeline responsibility. Research publication requires a hash-verified clean dataset and records its lineage.
 
 ## Storage decision
 

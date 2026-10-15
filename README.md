@@ -14,6 +14,8 @@ The central product decision is deliberate: **a large spread is not automaticall
 - Contract-level normalization and eligibility display
 - Explainable signal gates: statistics, expiry, liquidity, and costs
 - Walk-forward attribution view separating gross convergence from costs
+- Python API for authenticated MCX imports, dataset merges, research runs, and contextual refreshes
+- Railway-backed persistent raw archives and published analytical snapshots (when the service volume is attached)
 - Methodology and official-data notes inside the product
 - Dependency-free Python analytics with automated tests
 - shadcn primitives installed through the shadcn MCP registry
@@ -23,12 +25,14 @@ The visible market observations and backtest summary are clearly labeled synthet
 
 ## Run locally
 
-Requirements: Node.js 20+ and Python 3.11+.
+Requirements: Node.js 22+ and Python 3.11+.
 
 ```bash
 npm install
 npm run dev
 ```
+
+Run the local API in a second terminal with `npm run backend`. Vite proxies `/api` and `/health` to that process.
 
 Production checks:
 
@@ -42,9 +46,9 @@ npm audit --audit-level=high
 
 ## Deploy on Railway
 
-The repository includes a production multi-stage Docker build. Node compiles the Vite application and Caddy serves the static output using Railway's injected `PORT`, SPA fallback, compression, security headers, and `/health` endpoint.
+The production Docker image builds the React app, then runs Caddy and the Python API under a small supervisor. Caddy serves the UI and same-origin proxies `/api/*` and `/health` to Python on the private container interface. Python serves the demo artifact until a verified MCX research run is published.
 
-Connect `sru-codes/aurum-spread` from Railway's **Deploy from GitHub repo** flow, then generate a public domain. No application secrets are required for the synthetic MVP. See [the deployment guide](docs/DEPLOYMENT.md).
+Connect `sru-codes/aurum-spread` from Railway's **Deploy from GitHub repo** flow and generate a public domain. Attach a persistent volume at `/app/data`, set a strong `AURUM_ADMIN_TOKEN`, and configure optional provider keys as Railway variables. Without the volume, uploaded data disappears on redeploy; without the token, write endpoints remain disabled. See [the deployment guide](docs/DEPLOYMENT.md).
 
 ## Repository map
 
@@ -53,7 +57,8 @@ src/                    React product prototype
   components/ui/        shadcn registry components
   components/           React Bits component
   lib/                   typed artifact contracts and browser analytics
-analytics/              auditable Python research core, importer, and tests
+analytics/              Python research core, Railway API, importer, and tests
+scripts/railway_admin.py authenticated operator CLI (token stays in your shell)
 data/                    lineage manifests, validation reports, and cleaned outputs
 public/data/             browser-safe demo research and contextual snapshots
 docs/RESEARCH.md         data, methodology, risks, and build plan
@@ -93,7 +98,7 @@ International spot and FX context are deliberately separate from MCX contract an
 
 ## Project status
 
-Current release: **v0.2.0 — Data-Lineage Research Prototype**.
+Current release: **v0.3.0 — Railway Research Runtime**.
 
 The dashboard and analytical mechanics are functional, but the displayed observations remain synthetic until a user-supplied official MCX export passes the importer and a frozen historical holdout is completed. Automated access to MCX was blocked from the current build environment, and no substitute source has been presented as verified data. See the [analytics guide](analytics/README.md), [changelog](CHANGELOG.md), [versioning policy](docs/VERSIONING.md), [security policy](SECURITY.md), and [contribution guide](CONTRIBUTING.md).
 

@@ -55,6 +55,18 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(cleaned["mode"], "VERIFIED_HISTORICAL")
         self.assertEqual(cleaned["observations"][0]["expiry_date"], "2026-10-29")
 
+    def test_reimport_of_same_source_reuses_raw_archive(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "official.csv"
+            self.write_export(source)
+            workspace = root / "workspace"
+            first = ingest_official_export(source, "14/10/2026", workspace)
+            second = ingest_official_export(source, "14/10/2026", workspace)
+            raw_files = list((workspace / "data" / "raw").rglob("*.csv"))
+        self.assertEqual(first["dataset_id"], second["dataset_id"])
+        self.assertEqual(len(raw_files), 1)
+
     def test_rejected_import_gets_report_but_no_clean_dataset(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

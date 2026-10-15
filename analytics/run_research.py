@@ -54,6 +54,45 @@ def load_clean_dataset(path: str | Path) -> tuple[list[Observation], dict[str, A
     return observations, payload
 
 
+def generate_snapshot(
+    clean_dataset: str | Path,
+    *,
+    candidate: str,
+    candidate_expiry: date,
+    reference: str,
+    reference_expiry: date,
+    lookback: int,
+    annual_carry_bps: float,
+    output: str | Path,
+) -> dict[str, Any]:
+    observations, clean = load_clean_dataset(clean_dataset)
+    config = ResearchConfig(
+        lookback_sessions=lookback,
+        minimum_training_sessions=lookback,
+        annual_carry_bps=annual_carry_bps,
+    )
+    costs = CostModel()
+    points = build_spread_series(
+        observations, candidate.upper(), candidate_expiry,
+        reference.upper(), reference_expiry, config,
+    )
+    if not points:
+        raise DataQualityError("Selected contracts have no common trading sessions")
+    simulation = simulate_contracts(points, config, costs)
+    sensitivity = cost_sensitivity(points, config, costs, (1.0, 2.0, 5.0, 10.0))
+    snapshot = build_research_snapshot(
+        points, simulation, config, costs,
+        {
+            "dataset_id": clean["dataset_id"],
+            "source_lineage": clean["lineage"],
+            "clean_content_sha256": clean["content_sha256"],
+        },
+        sensitivity,
+    )
+    write_research_snapshot(output, snapshot)
+    return snapshot
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run expiry-aware Aurum Spread research")
     parser.add_argument("clean_dataset", type=Path)
@@ -66,38 +105,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
 
-    observations, clean = load_clean_dataset(args.clean_dataset)
-    config = ResearchConfig(
-        lookback_sessions=args.lookback,
-        minimum_training_sessions=args.lookback,
+    snapshot = generate_snapshot(
+        args.clean_dataset,
+        candidate=args.candidate,
+        candidate_expiry=args.candidate_expiry,
+        reference=args.reference,
+        reference_expiry=args.reference_expiry,
+        lookback=args.lookback,
         annual_carry_bps=args.annual_carry_bps,
+        output=args.output,
     )
-    costs = CostModel()
-    points = build_spread_series(
-        observations,
-        args.candidate.upper(),
-        args.candidate_expiry,
-        args.reference.upper(),
-        args.reference_expiry,
-        config,
-    )
-    if not points:
-        raise DataQualityError("Selected contracts have no common trading sessions")
-    simulation = simulate_contracts(points, config, costs)
-    sensitivity = cost_sensitivity(points, config, costs, (1.0, 2.0, 5.0, 10.0))
-    snapshot = build_research_snapshot(
-        points,
-        simulation,
-        config,
-        costs,
-        {
-            "dataset_id": clean["dataset_id"],
-            "source_lineage": clean["lineage"],
-            "clean_content_sha256": clean["content_sha256"],
-        },
-        sensitivity,
-    )
-    write_research_snapshot(args.output, snapshot)
     print(json.dumps({"output": str(args.output), "content_sha256": snapshot["content_sha256"]}, indent=2))
     return 0
 

@@ -23,9 +23,19 @@
         -Server
     }
 
-    respond /health "ok" 200
-    root * /srv
     encode zstd gzip
-    try_files {path} /index.html
-    file_server
+
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle /health {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
 }

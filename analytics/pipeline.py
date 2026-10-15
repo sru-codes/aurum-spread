@@ -91,8 +91,12 @@ def ingest_official_export(
     dataset_id = f"mcx-{requested_date.replace('/', '')}-{source_sha256[:12]}"
     root = Path(workspace)
     raw_path = root / "data" / "raw" / dataset_id / source.name
-    raw_path.parent.mkdir(parents=True, exist_ok=False)
-    shutil.copyfile(source, raw_path)
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    if raw_path.exists():
+        if sha256_bytes(raw_path.read_bytes()) != source_sha256:
+            raise RuntimeError("Existing raw archive does not match the incoming source hash")
+    else:
+        shutil.copyfile(source, raw_path)
     if sha256_bytes(raw_path.read_bytes()) != source_sha256:
         raise RuntimeError("Archived raw file failed byte-for-byte hash verification")
 
