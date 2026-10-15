@@ -7,6 +7,17 @@
     <meta name="theme-color" content="#f3f0e8" />
     <meta name="description" content="Cost-aware relative-value intelligence for MCX gold futures." />
     <title>Aurum Spread — MCX Relative-Value Intelligence</title>
+    <script>
+      try {
+        const preference = localStorage.getItem('aurum-theme')
+        const dark = preference === 'dark' || (preference !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#141512' : '#f3f0e8'
+      } catch {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

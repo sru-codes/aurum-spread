@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity, AlertTriangle, CalendarClock, CheckCircle2,
-  CircleHelp, Code2, Database, Download, FileUp, Globe2, Info, Moon, RefreshCw,
-  ShieldCheck, Sun, TrendingUp, XCircle,
+  CircleHelp, Code2, Database, Download, FileUp, Globe2, Info, RefreshCw,
+  ShieldCheck, TrendingUp, XCircle,
 } from 'lucide-react'
 import FadeContent from '@/components/FadeContent'
-import LandingPage from '@/LandingPage'
+import ThemeToggle from '@/components/ThemeToggle'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,6 +22,7 @@ import { formatIndianCurrency, formatNumber } from '@/lib/analytics'
 import './App.css'
 
 type LoadState = 'loading' | 'ready' | 'error'
+const LandingPage = lazy(() => import('@/LandingPage'))
 
 function shortDate(value: string) {
   return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short' }).format(new Date(`${value.slice(0, 10)}T00:00:00Z`))
@@ -274,7 +275,6 @@ function DashboardApp() {
   const [contextState, setContextState] = useState<LoadState>('loading')
   const [message, setMessage] = useState('Loading versioned artifacts…')
   const [now, setNow] = useState(() => Date.now())
-  const [dark, setDark] = useState(() => localStorage.getItem('aurum-theme') === 'dark')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const loadArtifacts = useCallback(async (bustCache = false) => {
@@ -312,11 +312,6 @@ function DashboardApp() {
   // Artifact loading is the external synchronization this effect owns.
   // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => { void loadArtifacts() }, [loadArtifacts])
-  useEffect(() => {
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-    localStorage.setItem('aurum-theme', dark ? 'dark' : 'light')
-  }, [dark])
-
   const importSnapshot = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -346,7 +341,7 @@ function DashboardApp() {
   }
 
   return <TooltipProvider><div className="app-shell">
-    <header className="topbar"><div className="brand-block"><div className="brand-mark" aria-hidden="true">Au</div><div><strong>Aurum Spread</strong><span>Commodity derivatives intelligence</span></div></div><div className="header-actions"><div className="data-state"><span className={bundle?.mode === 'VERIFIED_HISTORICAL' ? 'verified-dot' : ''} /><div><strong>{bundle?.mode === 'VERIFIED_HISTORICAL' ? 'Verified historical' : 'Research demo'}</strong><small aria-live="polite">{message}</small></div></div><input ref={inputRef} type="file" accept="application/json,.json" className="sr-only" onChange={importSnapshot} /><Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}><FileUp size={14} /> Import snapshot</Button><Button variant="outline" size="sm" onClick={() => void loadArtifacts(true)}><RefreshCw size={14} /> Refresh artifacts</Button><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon-sm" onClick={() => setDark((value) => !value)} aria-label={`Use ${dark ? 'light' : 'dark'} theme`}>{dark ? <Sun size={16} /> : <Moon size={16} />}</Button></TooltipTrigger><TooltipContent>{dark ? 'Light theme' : 'Dark theme'}</TooltipContent></Tooltip></div></header>
+    <header className="topbar"><div className="brand-block"><div className="brand-mark" aria-hidden="true">Au</div><div><strong>Aurum Spread</strong><span>Commodity derivatives intelligence</span></div></div><div className="header-actions"><div className="data-state"><span className={bundle?.mode === 'VERIFIED_HISTORICAL' ? 'verified-dot' : ''} /><div><strong>{bundle?.mode === 'VERIFIED_HISTORICAL' ? 'Verified historical' : 'Research demo'}</strong><small aria-live="polite">{message}</small></div></div><input ref={inputRef} type="file" accept="application/json,.json" className="sr-only" onChange={importSnapshot} /><Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}><FileUp size={14} /> Import snapshot</Button><Button variant="outline" size="sm" onClick={() => void loadArtifacts(true)}><RefreshCw size={14} /> Refresh artifacts</Button><Tooltip><TooltipTrigger asChild><ThemeToggle /></TooltipTrigger><TooltipContent>Cycle system, light, and dark themes</TooltipContent></Tooltip></div></header>
     <main><section className="hero-copy"><div><span className="eyebrow">Hack in Hills ’26 · Problem 03</span><h1>Find the spread.<br /><em>Prove the edge.</em></h1></div><p>A defensible monitor for MCX gold futures—expiry-aware, normalized for fine gold, and evaluated without hindsight. Context is global; evidence stays contract-specific.</p></section>
       <Tabs defaultValue="monitor"><div className="nav-row"><TabsList variant="line" aria-label="Product sections"><TabsTrigger value="monitor">Futures monitor</TabsTrigger><TabsTrigger value="global">Global gold</TabsTrigger><TabsTrigger value="sources">Data sources</TabsTrigger><TabsTrigger value="method">Methodology</TabsTrigger></TabsList><a className="repo-link" href="https://github.com/sru-codes/aurum-spread" target="_blank" rel="noreferrer"><Code2 size={15} /> Repository</a></div>
         <TabsContent value="monitor">{researchState === 'loading' ? <LoadingState copy="Loading the Python service research artifact…" /> : researchState === 'error' || !bundle ? <EmptyState title="Research service unavailable" copy="Check /health and the Railway service logs, or load a generated snapshot from your machine." /> : <ResearchTerminal key={bundle.content_sha256} bundle={bundle} onDownload={download} />}</TabsContent>
@@ -360,7 +355,9 @@ function DashboardApp() {
 }
 
 function App() {
-  return window.location.pathname.replace(/\/$/, '') === '/dashboard' ? <DashboardApp /> : <LandingPage />
+  return window.location.pathname.replace(/\/$/, '') === '/dashboard'
+    ? <DashboardApp />
+    : <Suspense fallback={<main className="landing-loading" role="status">Loading Aurum Spread…</main>}><LandingPage /></Suspense>
 }
 
 export default App

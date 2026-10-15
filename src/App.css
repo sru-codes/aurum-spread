@@ -8,6 +8,7 @@
 .brand-block strong { font-size: 14px; letter-spacing: -0.01em; }
 .brand-block span, .data-state small { color: var(--muted); font-size: 11px; }
 .header-actions { gap: 10px; }
+.theme-toggle { transition: background-color 180ms ease, color 180ms ease; }
 .data-state { gap: 8px; padding-right: 12px; border-right: 1px solid var(--line); }
 .data-state > span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
 .data-state > span:not(.verified-dot) { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }

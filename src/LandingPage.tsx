@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, CircleHelp, FileCheck2, Sca
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
+import ThemeToggle from '@/components/ThemeToggle'
 import './LandingPage.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -57,6 +58,7 @@ const workflow = [
 ]
 
 export default function LandingPage() {
+  const mainRef = useRef<HTMLElement>(null)
   const storyRef = useRef<HTMLDivElement>(null)
   const progressRef = useRef<HTMLSpanElement>(null)
 
@@ -96,7 +98,7 @@ export default function LandingPage() {
           },
         )
       }
-    }, storyRef)
+    }, mainRef)
 
     ScrollTrigger.refresh()
     return () => {
@@ -119,12 +121,12 @@ export default function LandingPage() {
         <a href="#why">The idea</a>
         <a href="#how-it-works">How it works</a>
       </nav>
-      <a className="landing-nav-cta" href="/dashboard">Open the panel <ArrowUpRight size={15} aria-hidden="true" /></a>
+      <div className="landing-nav-actions"><ThemeToggle className="landing-theme-toggle" /><a className="landing-nav-cta" href="/dashboard">Open the panel <ArrowUpRight size={15} aria-hidden="true" /></a></div>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" ref={mainRef}>
       <section className="landing-hero" aria-labelledby="landing-title">
-        <div className="landing-hero-copy">
+        <div className="landing-hero-copy" data-reveal>
           <span className="landing-kicker"><i /> A simple guide to Aurum Spread</span>
           <h1 id="landing-title">Gold prices can differ.<br /><em>Here’s how to tell why.</em></h1>
           <p>Aurum Spread helps you compare MCX gold contracts fairly—so a normal difference in weight, purity, or expiry isn’t mistaken for an opportunity.</p>
@@ -135,7 +137,7 @@ export default function LandingPage() {
           <p className="landing-hero-footnote"><ShieldCheck size={14} aria-hidden="true" /> Research and education only · No trading or order placement</p>
         </div>
 
-        <div className="comparison-illustration" aria-label="Conceptual illustration: different MCX gold contracts are normalized before comparison; no live prices shown">
+        <div className="comparison-illustration" data-reveal aria-label="Conceptual illustration: different MCX gold contracts are normalized before comparison; no live prices shown">
           <div className="illustration-head"><span>THE SIMPLE IDEA</span><span>01 / 03</span></div>
           <div className="illustration-title">Different contracts.<br /><strong>One fair comparison.</strong></div>
           <div className="contract-stack">
