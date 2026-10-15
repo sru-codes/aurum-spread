@@ -88,6 +88,12 @@ function isDateTime(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0 && Number.isFinite(Date.parse(value))
 }
 
+function isDateOnly(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00.000Z`)
+  return Number.isFinite(date.valueOf()) && date.toISOString().slice(0, 10) === value
+}
+
 function isPositiveNumber(value: unknown): value is string {
   return typeof value === 'string' && Number.isFinite(Number(value)) && Number(value) > 0
 }
@@ -122,8 +128,8 @@ function isSpot(value: unknown): value is GoldApiSpot {
 function isFx(value: unknown): value is GoldApiFx {
   return isObject(value) && value.base === 'USD' && value.quote === 'INR'
     && isPositiveNumber(value.rate)
-    && typeof value.requested_date === 'string' && Number.isFinite(Date.parse(value.requested_date))
-    && typeof value.effective_date === 'string' && Number.isFinite(Date.parse(value.effective_date))
+    && isDateOnly(value.requested_date)
+    && isDateOnly(value.effective_date)
 }
 
 function isBar(value: unknown): value is GoldApiBar {
@@ -139,21 +145,20 @@ function isBar(value: unknown): value is GoldApiBar {
 
 function isBars(value: unknown): value is NonNullable<GoldApiSnapshot['sections']['bars']['data']> {
   if (!isObject(value) || value.symbol !== 'XAU-USD-SPOT' || value.interval !== '1d'
-    || typeof value.from !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.from)
-    || typeof value.to !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.to)
-    || !Number.isFinite(Date.parse(value.from)) || !Number.isFinite(Date.parse(value.to))
+    || !isDateOnly(value.from)
+    || !isDateOnly(value.to)
     || typeof value.count !== 'number' || !Array.isArray(value.bars) || value.count !== value.bars.length
     || !value.bars.every(isBar)) return false
   if (value.from > value.to) return false
-  const dates = value.bars.map((bar: GoldApiBar) => bar.bar_start_utc)
+  const dates = value.bars.map((bar: GoldApiBar) => bar.bar_start_utc.slice(0, 10))
   return isStrictlyIncreasing(dates)
-    && (!dates.length || (dates[0].slice(0, 10) >= value.from && dates.at(-1)!.slice(0, 10) <= value.to))
+    && (!dates.length || (dates[0] >= value.from && dates.at(-1)! <= value.to))
 }
 
 function isMacro(value: unknown): value is NonNullable<GoldApiSnapshot['sections']['macro']['data']> {
   return isObject(value) && isObject(value.series)
     && Object.values(value.series).every((series) => Array.isArray(series) && series.every((item) => isObject(item)
-      && typeof item.date === 'string' && Number.isFinite(Date.parse(item.date))
+      && isDateOnly(item.date)
       && (item.value === null || isPositiveNumber(item.value) || (typeof item.value === 'string' && Number.isFinite(Number(item.value)))))
       && isStrictlyIncreasing(series.map((item: { date: string }) => item.date))
     )

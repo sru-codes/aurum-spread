@@ -73,3 +73,18 @@ test('gold API parser rejects unordered or out-of-range historical observations'
   ] } })
   assert.throws(() => parseGoldApiSnapshot(unorderedMacro), /macro data is invalid/)
 })
+
+test('gold API parser rejects duplicate daily bars and impossible calendar dates', () => {
+  const duplicateDay = snapshot()
+  const barData = duplicateDay.sections.bars.data as Record<string, unknown>
+  const [firstBar] = barData.bars as Array<Record<string, unknown>>
+  duplicateDay.sections.bars = section({ ...barData, to: '2026-10-14', count: 2, bars: [
+    firstBar,
+    { ...firstBar, bar_start_utc: '2026-10-14T12:00:00Z' },
+  ] })
+  assert.throws(() => parseGoldApiSnapshot(duplicateDay), /bars data is invalid/)
+
+  const impossibleDate = snapshot()
+  impossibleDate.sections.macro = section({ series: { DGS10: [{ date: '2026-02-30', value: '4.12' }] } })
+  assert.throws(() => parseGoldApiSnapshot(impossibleDate), /macro data is invalid/)
+})

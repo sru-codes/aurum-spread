@@ -69,7 +69,7 @@ Goldprice.dev attribution is displayed in the dashboard. The upstream free servi
 
 ### Requirements
 
-- Node.js **20.19 or newer, or 22.12 or newer** (matching the installed Vite toolchain)
+- Node.js **22.12 or newer** (matching the installed Vite toolchain)
 - Python **3.11 or newer**
 - Git
 
