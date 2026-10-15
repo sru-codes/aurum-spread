@@ -58,3 +58,18 @@ test('gold API parser rejects non-HTTPS news links', () => {
   input.sections.news = section({ articles: [{ title: 'Unsafe', url: 'javascript:alert(1)', published_at_utc: '2026-10-15T13:00:00Z', source: 'News' }] })
   assert.throws(() => parseGoldApiSnapshot(input), /news data is invalid/)
 })
+
+test('gold API parser rejects unordered or out-of-range historical observations', () => {
+  const outOfRange = snapshot()
+  const barData = outOfRange.sections.bars.data as Record<string, unknown>
+  const firstBar = (barData.bars as Array<Record<string, unknown>>)[0]
+  outOfRange.sections.bars = section({ ...barData, bars: [{ ...firstBar, bar_start_utc: '2026-10-15T00:00:00Z' }] })
+  assert.throws(() => parseGoldApiSnapshot(outOfRange), /bars data is invalid/)
+
+  const unorderedMacro = snapshot()
+  unorderedMacro.sections.macro = section({ series: { DGS10: [
+    { date: '2026-10-14', value: '4.12' },
+    { date: '2026-10-13', value: '4.10' },
+  ] } })
+  assert.throws(() => parseGoldApiSnapshot(unorderedMacro), /macro data is invalid/)
+})

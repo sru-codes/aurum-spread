@@ -11,7 +11,7 @@ Provider capabilities and limits were verified against their official documentat
 - Role: aggregate international XAU/USD spot, USD/INR reference FX, closed daily bars, provider health, and optional macro/news context
 - Observed service state on 15 October 2026: `/health` reported `ok`, the snapshot reported `LIVE`, and the browser origin was accepted by CORS. Availability can change; the dashboard validates the response and degrades gracefully.
 - Boundary: this is a separate Railway service. It is not an MCX data provider, and its prices never replace or enter the MCX futures signal calculation.
-- Optional service-side credentials: `GOLDPRICE_API_KEY`, `FRED_API_KEY`, and `GNEWS_API_KEY` belong in the Gold API Railway variables only. They are not needed in the Aurum browser.
+- Gold API credentials belong in the Gold API Railway variables. Aurum's separate Python refresh uses its own optional `GOLDPRICE_API_KEY`; Aurum's `FRED_API_KEY` and `GNEWS_API_KEY` currently affect provider status only and do not trigger those integrations. No provider secret is needed in the Aurum browser.
 
 The Gold API currently refreshes its own provider snapshot. Aurum's **Refresh view** button fetches the newest published snapshot; it does not force a third-party refresh.
 
@@ -25,7 +25,7 @@ The Gold API currently refreshes its own provider snapshot. Aurum's **Refresh vi
 ## goldprice.dev — supplementary international gold
 
 - Documentation: [goldprice.dev API](https://goldprice.dev/docs/api-reference)
-- Environment variable: optional `GOLDPRICE_API_KEY`
+- Environment variable: optional `GOLDPRICE_API_KEY` in the Aurum Python service; configure separately if also used by Gold API
 - Keyless limits: 10 requests/minute and 100/hour per IP; price is 15 minutes delayed
 - Free key: 5,000 calls/month and 10 requests/minute
 - Free history: most recent 30 days of daily XAU/USD bars
@@ -50,7 +50,7 @@ The adapter preserves both requested and effective dates. Historical joins are e
 
 - Documentation: [FRED API](https://fred.stlouisfed.org/docs/api/fred/)
 - Environment variable: `FRED_API_KEY`
-- Status in this repository: adapter implemented; not live-verified because no credential was supplied
+- Status in this repository: credential status is reported, but Aurum does not currently fetch FRED observations; the separate Gold API service may provide macro context from its own integration
 - Point-in-time rule: requests pin the FRED real-time period to the research `as_of` date. Observation/revision dates after that cutoff are rejected.
 
 Only economically motivated series should be configured, such as a documented interest-rate or inflation reference. Correlation must not be presented as causation.
@@ -60,7 +60,7 @@ Only economically motivated series should be configured, such as a documented in
 - Documentation: [GNews API](https://docs.gnews.io/)
 - Environment variable: `GNEWS_API_KEY`
 - Free tier: 100 requests/day, 10 articles/request, last 30 days, 12-hour delay, truncated content
-- Status in this repository: adapter implemented; not live-verified because no credential was supplied
+- Status in this repository: credential status is reported, but Aurum does not currently fetch GNews articles; the separate Gold API service may provide news context from its own integration
 
 Headlines are displayed as dated context only. The adapter rejects articles published after a historical cutoff, and news never enters the quantitative signal engine.
 
@@ -74,4 +74,4 @@ python3 analytics/refresh_context.py \
   --cache-dir .cache/providers
 ```
 
-The command succeeds with partial provider availability and records each provider's health. It never invents a missing observation. On Railway, the authenticated `refresh-context` operator command refreshes providers server-side and publishes the resulting snapshot to the persistent volume. The dashboard's refresh button fetches the current API artifacts; it does not expose credentials or trigger an unauthenticated provider call.
+The command fetches supported Aurum-side providers (goldprice.dev and Frankfurter), marks FRED/GNews as configured or not configured without fetching them, and records provider health. It never invents a missing observation. On Railway, the authenticated `refresh-context` operator command refreshes supported providers server-side and publishes the resulting snapshot to the persistent volume. The dashboard's refresh button fetches the current API artifacts; it does not expose credentials or trigger an unauthenticated provider call.

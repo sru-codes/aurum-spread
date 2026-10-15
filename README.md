@@ -61,7 +61,7 @@ Official MCX Bhavcopy exports are the only accepted source for the target future
 
 The dashboard reads the public snapshot from [`gold-api`](https://github.com/sru-codes/gold-api), deployed at [`goldapi.up.railway.app`](https://goldapi.up.railway.app/). It supplies XAU/USD spot, USD/INR reference FX, closed daily gold bars, provider health, and optional macro/news context. Its values are labeled international references and never replace a missing MCX futures observation or enter the MCX spread signal.
 
-The read-only API base can be set with `VITE_GOLD_API_URL`. The default is the deployed service URL. Do not put private credentials in any `VITE_` variable: Vite publishes those values in the browser bundle. Gold API’s optional FRED, GNews, and goldprice.dev credentials belong only in that service’s server-side environment. Its refresh route is not called by the Aurum browser.
+The read-only API base can be set with `VITE_GOLD_API_URL`. The default is the deployed service URL. Do not put private credentials in any `VITE_` variable: Vite publishes those values in the browser bundle. The Gold API service has its own server-side credentials and refresh process. Separately, Aurum’s Python context refresh uses `GOLDPRICE_API_KEY` for goldprice.dev and Frankfurter for FX; Aurum currently reports FRED/GNews credential configuration but does not fetch those sources itself. Its refresh route is not called by the Aurum browser.
 
 Goldprice.dev attribution is displayed in the dashboard. The upstream free service may be delayed; read the latest timestamp and staleness status rather than treating it as an executable quote. See [Data providers](docs/DATA_PROVIDERS.md) and the [Gold API repository](https://github.com/sru-codes/gold-api) for provider details.
 
@@ -69,7 +69,7 @@ Goldprice.dev attribution is displayed in the dashboard. The upstream free servi
 
 ### Requirements
 
-- Node.js **22 or newer** (Vite 8 requires a current Node release)
+- Node.js **20.19 or newer, or 22.12 or newer** (matching the installed Vite toolchain)
 - Python **3.11 or newer**
 - Git
 
@@ -126,7 +126,7 @@ The official export date must match the requested date. Contract identity includ
 
 ## Use the hosted Railway research service
 
-The Aurum application and `gold-api` are two separate Railway services. Aurum reads Gold API’s public, read-only endpoints; market context can fail without preventing the MCX research service from loading. For MCX imports and research publication, the Aurum service needs a persistent volume mounted at `/app/data` and an `AURUM_ADMIN_TOKEN` configured in Railway Variables.
+The Aurum application and `gold-api` are two separate Railway services. Aurum reads Gold API’s public, read-only endpoints; market context can fail without preventing the MCX research service from loading. To retain MCX imports and published research across redeployments, attach a persistent volume at `/app/data`. Configure `AURUM_ADMIN_TOKEN` in Railway Variables to authorize imports and research publication. Without the volume, the service can run, but its filesystem data is ephemeral.
 
 Set the Aurum URL and token in your **local shell only**. Never paste the token in a command that will be committed or put it in a `VITE_` variable:
 
@@ -164,9 +164,9 @@ After the run completes, open `/dashboard` and choose **Refresh view**. The butt
 | `VITE_GOLD_API_URL` | Aurum web build | Public base URL for the read-only Gold API; defaults to `https://goldapi.up.railway.app`. |
 | `AURUM_ADMIN_TOKEN` | Aurum Python API | Protects MCX upload, merge, research, and context-refresh routes. Keep server-side and in the local operator shell only. |
 | `AURUM_RAILWAY_URL` | Operator CLI | HTTPS URL for the Aurum service used by `scripts/railway_admin.py`. |
-| `GOLDPRICE_API_KEY` | Gold API service | Optional server-side key for its goldprice.dev provider. |
-| `FRED_API_KEY` | Gold API service | Optional server-side FRED key for macro context. |
-| `GNEWS_API_KEY` | Gold API service | Optional server-side GNews key for news context. |
+| `GOLDPRICE_API_KEY` | Aurum Python refresh (and separately Gold API if configured there) | Optional server-side key for goldprice.dev international spot context. |
+| `FRED_API_KEY` | Aurum status / Gold API if separately configured | Aurum reports whether configured but does not currently fetch FRED; the separate Gold API may use its own key for macro context. |
+| `GNEWS_API_KEY` | Aurum status / Gold API if separately configured | Aurum reports whether configured but does not currently fetch GNews; the separate Gold API may use its own key for news context. |
 
 See [.env.example](.env.example) for Aurum’s local environment template. Gold API has a separate environment template in its own repository. **Never commit real tokens, passwords, or provider keys.**
 

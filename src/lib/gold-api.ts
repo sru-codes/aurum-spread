@@ -92,6 +92,10 @@ function isPositiveNumber(value: unknown): value is string {
   return typeof value === 'string' && Number.isFinite(Number(value)) && Number(value) > 0
 }
 
+function isStrictlyIncreasing(values: string[]): boolean {
+  return values.every((value, index) => index === 0 || Date.parse(value) > Date.parse(values[index - 1]))
+}
+
 function validateSection<T>(value: unknown, name: string, validateData: (data: unknown) => data is T): GoldApiSection<T> {
   if (!isObject(value) || typeof value.status !== 'string') throw new Error(`Gold API ${name} section is invalid.`)
   const data = value.data
@@ -134,10 +138,16 @@ function isBar(value: unknown): value is GoldApiBar {
 }
 
 function isBars(value: unknown): value is NonNullable<GoldApiSnapshot['sections']['bars']['data']> {
-  return isObject(value) && value.symbol === 'XAU-USD-SPOT' && value.interval === '1d'
-    && typeof value.from === 'string' && typeof value.to === 'string'
-    && typeof value.count === 'number' && Array.isArray(value.bars) && value.count === value.bars.length
-    && value.bars.every(isBar)
+  if (!isObject(value) || value.symbol !== 'XAU-USD-SPOT' || value.interval !== '1d'
+    || typeof value.from !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.from)
+    || typeof value.to !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.to)
+    || !Number.isFinite(Date.parse(value.from)) || !Number.isFinite(Date.parse(value.to))
+    || typeof value.count !== 'number' || !Array.isArray(value.bars) || value.count !== value.bars.length
+    || !value.bars.every(isBar)) return false
+  if (value.from > value.to) return false
+  const dates = value.bars.map((bar: GoldApiBar) => bar.bar_start_utc)
+  return isStrictlyIncreasing(dates)
+    && (!dates.length || (dates[0].slice(0, 10) >= value.from && dates.at(-1)!.slice(0, 10) <= value.to))
 }
 
 function isMacro(value: unknown): value is NonNullable<GoldApiSnapshot['sections']['macro']['data']> {
@@ -145,6 +155,7 @@ function isMacro(value: unknown): value is NonNullable<GoldApiSnapshot['sections
     && Object.values(value.series).every((series) => Array.isArray(series) && series.every((item) => isObject(item)
       && typeof item.date === 'string' && Number.isFinite(Date.parse(item.date))
       && (item.value === null || isPositiveNumber(item.value) || (typeof item.value === 'string' && Number.isFinite(Number(item.value)))))
+      && isStrictlyIncreasing(series.map((item: { date: string }) => item.date))
     )
 }
 
